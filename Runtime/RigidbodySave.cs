@@ -1,9 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 namespace Floofinator.SimpleSave
 {
-    public class RigidbodySave : IdentifiedBehaviour, ISaveable
+    public class VelocitySave : IdentifiedBehaviour, ISaveable
     {
         Rigidbody rb;
         protected override void Awake()
@@ -13,27 +14,19 @@ namespace Floofinator.SimpleSave
         }
         public System.Type GetSaveType()
         {
-            return typeof(RigidbodyData);
+            return typeof(VelocityData);
         }
         public object Save()
         {
-            return new RigidbodyData()
+            return new VelocityData()
             {
-                Position = rb.position,
-                Rotation = rb.rotation.eulerAngles,
-                Scale = transform.localScale,
                 Velocity = rb.velocity,
                 AngularVelocity = rb.angularVelocity
             };
         }
         public void Load(object saveData)
         {
-            SetState((RigidbodyData)saveData);
-        }
-        void SetState(RigidbodyData data)
-        {
-            transform.SetPositionAndRotation(rb.position = data.Position, rb.rotation = Quaternion.Euler(data.Rotation));
-            transform.localScale = data.Scale;
+            VelocityData data = (VelocityData)saveData;
 
             if (rb.isKinematic) return;
 
@@ -41,11 +34,8 @@ namespace Floofinator.SimpleSave
             rb.angularVelocity = data.AngularVelocity;
         }
         [System.Serializable]
-        public struct RigidbodyData
+        public struct VelocityData
         {
-            public Vector3 Position;
-            public Vector3 Rotation;
-            public Vector3 Scale;
             public Vector3 Velocity;
             public Vector3 AngularVelocity;
         }

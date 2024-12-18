@@ -14,7 +14,7 @@ namespace Floofinator.SimpleSave
         {
             SetRoot(root);
         }
-        public void SetRoot(string root) { rootDirectory = root; }
+        public void SetRoot(string root) { rootDirectory = Path.Combine(Application.persistentDataPath, root); }
         public void DeleteFile(string directory, string fileName)
         {
             string directoryPath = Path.Combine(rootDirectory, directory);
@@ -22,7 +22,7 @@ namespace Floofinator.SimpleSave
 
             if (File.Exists(filePath)) File.Delete(filePath);
 
-            Debug.Log($"Deleted file from {directoryPath}.");
+            Debug.Log($"Deleted file from \"{directoryPath}\"");
         }
         public bool FileExists(string directory, string fileName)
         {
@@ -34,7 +34,29 @@ namespace Floofinator.SimpleSave
 
             if (Directory.Exists(directoryPath)) Directory.Delete(directoryPath, true);
 
-            Debug.Log($"Deleted directory {directoryPath}.");
+            Debug.Log($"Deleted directory \"{directoryPath}\"");
+        }
+        public string[] GetDirectories(string directory)
+        {
+            string directoryPath = Path.Combine(rootDirectory, directory);
+
+            return PathsToNames(Directory.GetDirectories(directoryPath));
+        }
+        string[] PathsToNames(string[] paths)
+        {
+            string[] directoryNames = new string[paths.Length];
+
+            for (int i = 0; i < paths.Length; i++)
+            {
+                directoryNames[i] = Path.GetFileName(paths[i]);
+            }
+
+            return directoryNames;
+        }
+        public string[] GetFiles(string directory)
+        {
+            string directoryPath = Path.Combine(rootDirectory, directory);
+            return PathsToNames(Directory.GetFiles(directoryPath));
         }
         public bool DirectoryExists(string directory)
         {
@@ -46,7 +68,7 @@ namespace Floofinator.SimpleSave
 
             if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
 
-            Debug.Log($"Created directory {directoryPath}.");
+            Debug.Log($"Created directory \"{directoryPath}\"");
         }
         public string GetFilePath(string directory, string fileName)
         {

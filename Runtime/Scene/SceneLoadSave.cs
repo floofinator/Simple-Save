@@ -13,15 +13,17 @@ namespace Floofinator.SimpleSave
             jsonFiler = new();
             StartCoroutine(LoadRoutine());
         }
-        private void OnDestroy()
+        private void OnApplicationQuit()
         {
             SceneFiler.SaveScene(jsonFiler);
         }
         IEnumerator LoadRoutine()
         {
-            //Wait a frame before we load so that any objects that do something on Start can do it first.
+            //Wait to the end of the frame before we load so that any objects that do something on Start can do it first.
             yield return new WaitForEndOfFrame();
-            SceneFiler.LoadScene(jsonFiler);
+            
+            bool hasSave = SceneFiler.LoadScene(jsonFiler);
+            Debug.Log("Save File: " + hasSave);
         }
     }
 }

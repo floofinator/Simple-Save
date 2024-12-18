@@ -2,28 +2,28 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using UnityEngine;
+
 namespace Floofinator.SimpleSave
 {
     public class TransformSave : IdentifiedBehaviour, ISaveable
     {
-        public object Save()
+        public virtual object Save()
         {
             TransformData data = new()
             {
                 Position = transform.position,
-                Rotation = transform.eulerAngles,
+                Rotation = transform.rotation,
                 Scale = transform.localScale
             };
             return data;
         }
-        public void Load(object saveData)
+        public virtual void Load(object saveData)
         {
             TransformData data = (TransformData)saveData;
-            transform.position = data.Position;
-            transform.eulerAngles = data.Rotation;
+            transform.SetPositionAndRotation(data.Position, data.Rotation);
             transform.localScale = transform.localScale;
         }
-        public Type GetSaveType()
+        public virtual Type GetSaveType()
         {
             return typeof(TransformData);
         }
@@ -31,7 +31,7 @@ namespace Floofinator.SimpleSave
         public struct TransformData
         {
             public Vector3 Position;
-            public Vector3 Rotation;
+            public Quaternion Rotation;
             public Vector3 Scale;
         }
     }

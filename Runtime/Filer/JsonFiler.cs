@@ -2,24 +2,24 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
-
 namespace Floofinator.SimpleSave
 {
-    public class BinaryFiler : Filer
+    public class JsonFiler : Filer
     {
-        readonly BinaryFormatter formatter = new();
         public override void SaveFile(string directory, string fileName, object data)
         {
             string filePath = GetFilePath(directory, fileName);
             
             if (!DirectoryExists(directory)) CreateDirectory(directory);
 
-            using FileStream stream = new(filePath, FileMode.Create);
-            formatter.Serialize(stream, data);
+            string dataJson = JsonUtility.ToJson(data, true);
 
-            Debug.Log($"Saved file to {filePath}.");
+            using FileStream stream = new(filePath, FileMode.Create);
+            using StreamWriter writer = new(stream);
+            writer.Write(dataJson);
+
+            Debug.Log($"Saved file to \"{filePath}\".");
         }
         public override bool LoadFile(string directory, string fileName, Type saveType, out object data)
         {
@@ -28,14 +28,17 @@ namespace Floofinator.SimpleSave
             if (!FileExists(directory, fileName))
             {
                 data = default;
-                Debug.Log($"No file to load from {filePath}.");
+                Debug.Log($"No file to load from \"{filePath}\".");
                 return false;
             }
 
             using FileStream stream = new(filePath, FileMode.Open);
-            data = formatter.Deserialize(stream);
+            using StreamReader reader = new(stream);
+            string dataJson = reader.ReadToEnd();
 
-            Debug.Log($"Loaded file from {filePath}.");
+            data = JsonUtility.FromJson(dataJson, saveType);
+
+            Debug.Log($"Loaded file from \"{filePath}\".");
 
             return true;
         }

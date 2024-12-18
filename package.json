@@ -10,6 +10,13 @@
       "name": "Floofinator",
       "email": "contact@floofinator.com",
       "url": "https://www.floofinator.com"
-    }
+    },
+    "samples": [
+        {
+            "displayName": "Basic Scene and Dynamic Saving",
+            "description": "Contains a basic example of saving a scene and instances.",
+            "path": "Samples~/BasicSave"
+        }
+    ]
   }
   
