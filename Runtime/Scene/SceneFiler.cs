@@ -17,8 +17,6 @@ namespace Floofinator.SimpleSave
 
             filer.DeleteDirectory(sceneName);
 
-            Debug.Log($"Saving scene data for {sceneName}.");
-
             foreach (var identity in IdentifiedBehaviour.ID_DICTIONARY.Values)
             {
                 if (identity is not ISaveable saveable) continue;
@@ -37,12 +35,12 @@ namespace Floofinator.SimpleSave
             string sceneName = GetSceneName();
 
             filer.DeleteDirectory(sceneName);
+
+            Debug.Log($"Cleared save data for \"{sceneName}\"");
         }
         public static bool LoadScene(Filer filer)
         {
             string sceneName = GetSceneName();
-
-            Debug.Log($"Loading scene data for {sceneName}.");
 
             if (!filer.DirectoryExists(sceneName)) return false;
 
@@ -77,7 +75,6 @@ namespace Floofinator.SimpleSave
         }
         static void LoadFiles(Filer filer, string directory)
         {
-            Debug.Log(directory);
             string parentID = "";
             string[] dataParts = directory.Split('.');
             if (dataParts.Length > 1) parentID = dataParts[1] + '.';
@@ -85,7 +82,6 @@ namespace Floofinator.SimpleSave
             foreach (var fileIDName in filer.GetFiles(directory))
             {
                 string dictionaryID = parentID + Path.GetFileNameWithoutExtension(fileIDName);
-                Debug.Log(dictionaryID);
                 if (IdentifiedBehaviour.ID_DICTIONARY.TryGetValue(dictionaryID, out IdentifiedBehaviour identity))
                 {
                     if (identity is ISaveable saveable)

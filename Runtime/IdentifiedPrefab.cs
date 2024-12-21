@@ -8,5 +8,11 @@ namespace Floofinator.SimpleSave
     {
         [SerializeField] string resourcePath;
         public string ResourcePath => resourcePath;
+        protected override void Start()
+        {
+            GenerateID();
+
+            base.Start();
+        }
     }
 }

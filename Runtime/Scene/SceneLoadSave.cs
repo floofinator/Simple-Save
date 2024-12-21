@@ -19,11 +19,10 @@ namespace Floofinator.SimpleSave
         }
         IEnumerator LoadRoutine()
         {
-            //Wait to the end of the frame before we load so that any objects that do something on Start can do it first.
+            //Wait to the end of the frame before we load so that the dictionary can be established first.
             yield return new WaitForEndOfFrame();
-            
-            bool hasSave = SceneFiler.LoadScene(jsonFiler);
-            Debug.Log("Save File: " + hasSave);
+
+            SceneFiler.LoadScene(jsonFiler);
         }
     }
 }

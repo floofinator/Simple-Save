@@ -33,8 +33,6 @@ namespace Floofinator.SimpleSave
             string directoryPath = Path.Combine(rootDirectory, directory);
 
             if (Directory.Exists(directoryPath)) Directory.Delete(directoryPath, true);
-
-            Debug.Log($"Deleted directory \"{directoryPath}\"");
         }
         public string[] GetDirectories(string directory)
         {
@@ -67,8 +65,6 @@ namespace Floofinator.SimpleSave
             string directoryPath = Path.Combine(rootDirectory, directory);
 
             if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
-
-            Debug.Log($"Created directory \"{directoryPath}\"");
         }
         public string GetFilePath(string directory, string fileName)
         {
