@@ -24,6 +24,12 @@ namespace Floofinator.SimpleSave
             if (local) transform.SetLocalPositionAndRotation(data.Position, data.Rotation);
             else transform.SetPositionAndRotation(data.Position, data.Rotation);
             transform.localScale = transform.localScale;
+
+            if (TryGetComponent(out Rigidbody rigidbody))
+            {
+                rigidbody.position = transform.position;
+                rigidbody.rotation = transform.rotation;
+            }
         }
         public virtual Type GetSaveType()
         {
