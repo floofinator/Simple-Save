@@ -7,12 +7,13 @@ namespace Floofinator.SimpleSave
 {
     public class TransformSave : IdentifiedBehaviour, ISaveable
     {
+        [SerializeField] bool local = false;
         public virtual object Save()
         {
             TransformData data = new()
             {
-                Position = transform.position,
-                Rotation = transform.rotation,
+                Position = local?transform.localPosition:transform.position,
+                Rotation = local?transform.localRotation:transform.rotation,
                 Scale = transform.localScale
             };
             return data;
@@ -20,7 +21,8 @@ namespace Floofinator.SimpleSave
         public virtual void Load(object saveData)
         {
             TransformData data = (TransformData)saveData;
-            transform.SetPositionAndRotation(data.Position, data.Rotation);
+            if (local) transform.SetLocalPositionAndRotation(data.Position, data.Rotation);
+            else transform.SetPositionAndRotation(data.Position, data.Rotation);
             transform.localScale = transform.localScale;
         }
         public virtual Type GetSaveType()

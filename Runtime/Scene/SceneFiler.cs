@@ -11,6 +11,13 @@ namespace Floofinator.SimpleSave
     {
         const string SCENE_SAVE = "Scene";
         static string GetSceneName() => SceneManager.GetActiveScene().name;
+        public static void InitialIdentification()
+        {
+            foreach (var identity in GameObject.FindObjectsOfType<IdentifiedBehaviour>())
+            {
+                identity.AddID();
+            }
+        }
         public static void SaveScene(Filer filer)
         {
             string sceneName = GetSceneName();
@@ -66,9 +73,7 @@ namespace Floofinator.SimpleSave
             if (prefab == null) Debug.LogErrorFormat($"No prefab with name \"{dataParts[0]}\" found in Resources.");
             GameObject instance = GameObject.Instantiate(prefab);
 
-            instance.GetComponent<IdentifiedPrefab>().SetID(dataParts[1]);
-            //make sure all the child identities are added to the dictionary.
-            foreach (var behaviour in instance.GetComponentsInChildren<IdentifiedBehaviour>()) behaviour.AddID();
+            instance.GetComponent<IdentifiedPrefab>().AssignInstanceID(dataParts[1]);
 
             string dataDirectory = Path.Combine(sceneName, dataName);
             LoadFiles(filer, dataDirectory);

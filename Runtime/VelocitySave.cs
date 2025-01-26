@@ -7,9 +7,8 @@ namespace Floofinator.SimpleSave
     public class VelocitySave : IdentifiedBehaviour, ISaveable
     {
         Rigidbody rb;
-        protected override void Awake()
+        void Awake()
         {
-            base.Awake();
             rb = GetComponent<Rigidbody>();
         }
         public System.Type GetSaveType()
