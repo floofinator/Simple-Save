@@ -9,15 +9,16 @@ namespace Floofinator.SimpleSave
     public class SceneSaveLoad : MonoBehaviour
     {
         public JsonFiler Filer => jsonFiler;
-        public UnityEvent OnLoaded, OnSaved;
+        public UnityEvent OnNoSave, OnLoaded, OnSaved;
         JsonFiler jsonFiler;
         void Start()
         {
             jsonFiler = new();
             SceneFiler.InitialIdentification();
-            SceneFiler.LoadScene(jsonFiler);
+            bool loaded = SceneFiler.LoadScene(jsonFiler);
 
-            OnLoaded?.Invoke();
+            if (loaded) OnLoaded?.Invoke();
+            else OnNoSave?.Invoke();
         }
         private void OnApplicationQuit()
         {
