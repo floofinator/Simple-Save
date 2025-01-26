@@ -58,7 +58,6 @@ namespace Floofinator.SimpleSave
         }
         public void RemoveID()
         {
-            print("Removing Id \"" + DictionaryID + "\"");
             if (!ID_DICTIONARY.ContainsKey(DictionaryID))
             {
                 Debug.LogWarning("ID \"" + DictionaryID + "\" does not exist for \"" + gameObject.name + "\" so it cannot be removed.");
