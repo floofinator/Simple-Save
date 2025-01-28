@@ -4,7 +4,7 @@ using UnityEditor.UIElements;
 
 namespace Floofinator.SimpleSave.Editor
 {
-    [CustomEditor(typeof(IdentifiedPrefab))]
+    [CustomEditor(typeof(IdentifiedInstance))]
     public class IdentifiedPrefabEditor : UnityEditor.Editor
     {
         IdentifiedBehaviour identity;

@@ -5,17 +5,21 @@ using System.Linq;
 using UnityEngine.SceneManagement;
 using System.IO;
 using System;
+using System.IO.Compression;
 namespace Floofinator.SimpleSave
 {
     public static class SceneFiler
     {
-        const string SCENE_SAVE = "Scene";
         static string GetSceneName() => SceneManager.GetActiveScene().name;
-        public static void InitialIdentification()
+        static void InitializeIdentification()
         {
             foreach (var identity in GameObject.FindObjectsOfType<IdentifiedBehaviour>())
             {
-                identity.AddID();
+                identity.IdentifyParent();
+            }
+            foreach (var identity in GameObject.FindObjectsOfType<IdentifiedBehaviour>())
+            {
+                identity.AddToDictionary();
             }
         }
         public static void SaveScene(Filer filer)
@@ -28,14 +32,22 @@ namespace Floofinator.SimpleSave
             {
                 if (identity is not ISaveable saveable) continue;
 
-                string sceneDataName = SCENE_SAVE;
-                if (identity.ParentPrefab) sceneDataName = identity.ParentPrefab.ResourcePath + '.' + identity.ParentPrefab.ID;
+                string dataPath = "";
+                IdentifiedObject parent = identity.ParentObject;
+                while (parent)
+                {
+                    dataPath = Path.Combine(parent.ID, dataPath);
+                    if (parent is IdentifiedInstance instance) dataPath = Path.Combine('#' + instance.ResourcePath, dataPath);
+                    parent = parent.ParentObject;
+                }
 
-                string directory = Path.Combine(sceneName, sceneDataName);
+                string directory = Path.Combine(sceneName, dataPath);
                 if (!filer.DirectoryExists(directory)) filer.CreateDirectory(directory);
 
-                filer.SaveFile(directory, $"{identity.ID}.json", saveable.Save());
+                filer.SaveFile(directory, $"{identity.ID}.save", saveable.Save());
             }
+
+            filer.Compress();
         }
         public static void ClearScene(Filer filer)
         {
@@ -47,51 +59,85 @@ namespace Floofinator.SimpleSave
         }
         public static bool LoadScene(Filer filer)
         {
+            filer.UnCompress();
+
+            InitializeIdentification();
+
             string sceneName = GetSceneName();
 
             if (!filer.DirectoryExists(sceneName)) return false;
 
-            foreach (var sceneDataName in filer.GetDirectories(sceneName))
-            {
-                if (sceneDataName.Equals(SCENE_SAVE)) LoadStaticData(filer, sceneName);
-                else LoadDynamicData(filer, sceneName, sceneDataName);
-            }
+            LoadDirectory(filer, sceneName);
+
+            filer.CleanUpUnCompress();
 
             return true;
         }
-        static void LoadStaticData(Filer filer, string sceneName)
+        static void LoadDirectory(Filer filer, string directory)
         {
-            string dataDirectory = Path.Combine(sceneName, SCENE_SAVE);
-            LoadFiles(filer, dataDirectory);
+            //load data from files
+            LoadFiles(filer, directory);
+            //look for other directories
+            foreach (var dataName in filer.GetDirectories(directory))
+            {
+                //if this directory is an instanced object, denoted by the '#' as a starting character
+                //all the subdirectories are instance id's
+                string dataDirectory = Path.Combine(directory,dataName);
+                string[] splitName = dataName.Split('#');
+                if (splitName.Length > 1)
+                {
+                    foreach (var instanceDataName in filer.GetDirectories(dataDirectory))
+                    {
+                        CreateIdentifiedInstance(splitName[1], instanceDataName, directory);
+                    }
+                }
+                LoadDirectory(filer, dataDirectory);
+            }
         }
-        static void LoadDynamicData(Filer filer, string sceneName, string dataName)
+        static void CreateIdentifiedInstance(string prefabName, string instanceID, string directory)
         {
-            string[] dataParts = Path.GetFileName(dataName).Split('.');
+            GameObject prefab = Resources.Load<GameObject>(prefabName);
 
-            GameObject prefab = Resources.Load<GameObject>(dataParts[0]);
+            if (prefab == null) Debug.LogErrorFormat($"No prefab with name \"{prefabName}\" found in Resources.");
 
-            if (prefab == null) Debug.LogErrorFormat($"No prefab with name \"{dataParts[0]}\" found in Resources.");
-            GameObject instance = GameObject.Instantiate(prefab);
+            Transform parent = null;
 
-            instance.GetComponent<IdentifiedPrefab>().AssignInstanceID(dataParts[1]);
+            string dictionaryID = GetIDFromDirectory(directory);
+            if (IdentifiedBehaviour.ID_DICTIONARY.TryGetValue(dictionaryID, out IdentifiedBehaviour identity))
+            {
+                parent = identity.transform;
+            }
 
-            string dataDirectory = Path.Combine(sceneName, dataName);
-            LoadFiles(filer, dataDirectory);
+            GameObject instance = GameObject.Instantiate(prefab, parent);
+
+            instance.GetComponent<IdentifiedInstance>().AssignInstanceID(instanceID);
+        }
+        //this needs to be fixed to account for parent ids in the directory heirarchy
+        static string GetIDFromDirectory(string directory)
+        {
+            string parentID = "";
+            string[] dataParts = directory.Split('\\');
+            foreach (string id in dataParts)
+            {
+                if (id == GetSceneName()) continue;
+                if (id.Contains('#')) continue;
+                if (!string.IsNullOrWhiteSpace(parentID)) parentID += '.';
+                parentID += id;
+            }
+            return parentID;
         }
         static void LoadFiles(Filer filer, string directory)
         {
-            string parentID = "";
-            string[] dataParts = directory.Split('.');
-            if (dataParts.Length > 1) parentID = dataParts[1] + '.';
+            string parentID = GetIDFromDirectory(directory);
 
-            foreach (var fileIDName in filer.GetFiles(directory))
+            foreach (var dataName in filer.GetFiles(directory))
             {
-                string dictionaryID = parentID + Path.GetFileNameWithoutExtension(fileIDName);
+                string dictionaryID = parentID + "." + Path.GetFileNameWithoutExtension(dataName);
                 if (IdentifiedBehaviour.ID_DICTIONARY.TryGetValue(dictionaryID, out IdentifiedBehaviour identity))
                 {
                     if (identity is ISaveable saveable)
                     {
-                        if (filer.LoadFile(directory, $"{identity.ID}.json", saveable.GetSaveType(), out object data))
+                        if (filer.LoadFile(directory, $"{identity.ID}.save", saveable.GetSaveType(), out object data))
                         {
                             saveable.Load(data);
                         }

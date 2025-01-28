@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using UnityEngine;
 
 namespace Floofinator.SimpleSave
@@ -14,7 +15,35 @@ namespace Floofinator.SimpleSave
         {
             SetRoot(root);
         }
-        public void SetRoot(string root) { rootDirectory = Path.Combine(Application.persistentDataPath, root); }
+        public void SetRoot(string root) { rootDirectory = Path.Combine(Application.persistentDataPath, "SaveData", root); }
+        public void Compress()
+        {
+            if (!Directory.Exists(rootDirectory)) return;
+            string directory = Path.GetDirectoryName(rootDirectory);
+            string name = Path.GetFileName(rootDirectory);
+            string fileName = Path.Combine(directory, name + ".save");
+
+            if (File.Exists(fileName)) File.Delete(fileName);
+
+            ZipFile.CreateFromDirectory(rootDirectory, fileName, System.IO.Compression.CompressionLevel.Fastest, false);
+            
+            Directory.Delete(rootDirectory, true);
+        }
+        public void UnCompress()
+        {
+            string directory = Path.GetDirectoryName(rootDirectory);
+            string name = Path.GetFileName(rootDirectory);
+            string fileName = Path.Combine(directory, name + ".save");
+
+            if (!File.Exists(fileName)) return;
+            if (Directory.Exists(rootDirectory)) Directory.Delete(rootDirectory, true);
+
+            ZipFile.ExtractToDirectory(fileName, rootDirectory);
+        }
+        public void CleanUpUnCompress()
+        {
+            if (Directory.Exists(rootDirectory)) Directory.Delete(rootDirectory, true);
+        }
         public void DeleteFile(string directory, string fileName)
         {
             string directoryPath = Path.Combine(rootDirectory, directory);

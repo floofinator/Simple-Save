@@ -3,46 +3,28 @@ using UnityEngine;
 
 namespace Floofinator.SimpleSave
 {
+    /// <summary>
+    /// A base class for MonoBehaviours that can save and load data.
+    /// </summary>
     public abstract class IdentifiedBehaviour : MonoBehaviour
     {
         [SerializeField, HideInInspector] protected string id = string.Empty;
         public string DictionaryID => GetParentID() + id;
         public string ID => id;
         public bool HasEmptyID => string.IsNullOrWhiteSpace(ID);
-        IdentifiedPrefab parentPrefab = null;
-        public IdentifiedPrefab ParentPrefab => parentPrefab;
+        public IdentifiedObject ParentObject {get; protected set;}
         public static Dictionary<string, IdentifiedBehaviour> ID_DICTIONARY = new();
+        public virtual void IdentifyParent()
+        {
+            ParentObject = GetComponentInParent<IdentifiedObject>();
+        }
         string GetParentID()
         {
-            if (parentPrefab == null) parentPrefab = TryGetParent();
-            if (parentPrefab == this)
-            {
-                Debug.LogError("OOPS! The parent of this identity was somehow assigned to itself! This shouldn't happen!");
-                parentPrefab = null;
-            }
-
-            if (parentPrefab)
-            {
-                return parentPrefab.DictionaryID + '.';
-            }
+            if (ParentObject) return ParentObject.DictionaryID + '.';
 
             return string.Empty;
         }
-        IdentifiedPrefab TryGetParent()
-        {
-            if (this is IdentifiedPrefab)
-            {
-                if (transform.parent == null) return null;
-                //if this is a prefab id and we want to see if there is one in parent
-                return transform.parent.GetComponentInParent<IdentifiedPrefab>();
-            }
-            else
-            {
-                //if this is not a prefab id
-                return GetComponentInParent<IdentifiedPrefab>();
-            }
-        }
-        public void AddID()
+        public void AddToDictionary()
         {
             if (HasEmptyID)
             {
@@ -56,7 +38,7 @@ namespace Floofinator.SimpleSave
             }
             ID_DICTIONARY.Add(DictionaryID, this);
         }
-        public void RemoveID()
+        public void RemoveFromDictionary()
         {
             if (!ID_DICTIONARY.ContainsKey(DictionaryID))
             {
@@ -67,7 +49,7 @@ namespace Floofinator.SimpleSave
         }
         protected virtual void OnDestroy()
         {
-            RemoveID();
+            RemoveFromDictionary();
         }
     }
 }

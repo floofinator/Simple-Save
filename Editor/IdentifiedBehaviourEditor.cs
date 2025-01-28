@@ -14,7 +14,7 @@ namespace Floofinator.SimpleSave.Editor
         {
             VisualElement root = new();
 
-            TextField idField = new("Save ID")
+            TextField idField = new("ID")
             {
                 name = "id",
                 bindingPath = "id"

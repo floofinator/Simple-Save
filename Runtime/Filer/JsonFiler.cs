@@ -19,7 +19,7 @@ namespace Floofinator.SimpleSave
             using StreamWriter writer = new(stream);
             writer.Write(dataJson);
 
-            Debug.Log($"Saved file to \"{filePath}\".");
+            // Debug.Log($"Saved file to \"{filePath}\".");
         }
         public override bool LoadFile(string directory, string fileName, Type saveType, out object data)
         {
@@ -38,7 +38,7 @@ namespace Floofinator.SimpleSave
 
             data = JsonUtility.FromJson(dataJson, saveType);
 
-            Debug.Log($"Loaded file from \"{filePath}\".");
+            // Debug.Log($"Loaded file from \"{filePath}\".");
 
             return true;
         }
