@@ -18,13 +18,6 @@ namespace Floofinator.SimpleSave
         {
             resourcePath = gameObject.name;
         }
-        private void Awake()
-        {
-            foreach (var identified in GetComponentsInChildren<IdentifiedBehaviour>())
-            {
-                identified.IdentifyParent();
-            }
-        }
         private void Start()
         {
             //if this prefab is instantiated without an id, we need to create one.
@@ -33,11 +26,6 @@ namespace Floofinator.SimpleSave
         public void AssignInstanceID(string newId)
         {
             id = newId;
-            // Debug.Log("Prefab assigned id: \"" + id + "\"");
-            foreach (var identified in GetComponentsInChildren<IdentifiedBehaviour>())
-            {
-                identified.AddToDictionary();
-            }
         }
         public void GenerateInstanceID()
         {

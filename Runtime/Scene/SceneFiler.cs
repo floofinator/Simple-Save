@@ -13,17 +13,21 @@ namespace Floofinator.SimpleSave
         static string GetSceneName() => SceneManager.GetActiveScene().name;
         static void InitializeIdentification()
         {
-            foreach (var identity in GameObject.FindObjectsOfType<IdentifiedBehaviour>())
+            IdentifiedBehaviour.ID_DICTIONARY.Clear();
+            IdentifiedBehaviour[] all = GameObject.FindObjectsOfType<IdentifiedBehaviour>();
+            foreach (var identity in all)
             {
                 identity.IdentifyParent();
             }
-            foreach (var identity in GameObject.FindObjectsOfType<IdentifiedBehaviour>())
+            foreach (var identity in all)
             {
                 identity.AddToDictionary();
             }
         }
         public static void SaveScene(Filer filer)
         {
+            InitializeIdentification();
+
             string sceneName = GetSceneName();
 
             filer.DeleteDirectory(sceneName);
