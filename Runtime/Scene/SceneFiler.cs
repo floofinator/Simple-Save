@@ -26,8 +26,6 @@ namespace Floofinator.SimpleSave
         }
         public static void SaveScene(Filer filer)
         {
-            InitializeIdentification();
-
             string sceneName = GetSceneName();
 
             filer.DeleteDirectory(sceneName);
