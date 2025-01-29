@@ -69,21 +69,20 @@ namespace Floofinator.SimpleSave
 
             if (!filer.DirectoryExists(sceneName)) return false;
 
+            //load instances first before loading data so that they can be identified
+            LoadDirectoryInstances(filer, sceneName);
             LoadDirectory(filer, sceneName);
 
             filer.CleanUpUnCompress();
 
             return true;
         }
-        static void LoadDirectory(Filer filer, string directory)
+        static void LoadDirectoryInstances(Filer filer, string directory)
         {
-            //load data from files
-            LoadFiles(filer, directory);
-            //look for other directories
             foreach (var dataName in filer.GetDirectories(directory))
             {
                 //if this directory is an instanced object, denoted by the '#' as a starting character
-                //all the subdirectories are instance id's
+                //all the subdirectories are instance id's and need to be re-instanced
                 string dataDirectory = Path.Combine(directory,dataName);
                 string[] splitName = dataName.Split('#');
                 if (splitName.Length > 1)
@@ -93,6 +92,17 @@ namespace Floofinator.SimpleSave
                         CreateIdentifiedInstance(splitName[1], instanceDataName, directory);
                     }
                 }
+                LoadDirectoryInstances(filer, dataDirectory);
+            }
+        }
+        static void LoadDirectory(Filer filer, string directory)
+        {
+            //load data from files
+            LoadFiles(filer, directory);
+            //look for other directories
+            foreach (var dataName in filer.GetDirectories(directory))
+            {
+                string dataDirectory = Path.Combine(directory,dataName);
                 LoadDirectory(filer, dataDirectory);
             }
         }

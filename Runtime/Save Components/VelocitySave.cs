@@ -35,8 +35,8 @@ namespace Floofinator.SimpleSave
         [System.Serializable]
         public struct VelocityData
         {
-            public Vector3 Velocity;
-            public Vector3 AngularVelocity;
+            public SaveVector3 Velocity;
+            public SaveVector3 AngularVelocity;
         }
     }
 }

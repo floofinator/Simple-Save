@@ -2,14 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
+using System.Xml.Serialization;
 using UnityEngine;
 
 namespace Floofinator.SimpleSave
 {
-    public class BinaryFiler : Filer
+    public class XMLFiler : Filer
     {
-        readonly BinaryFormatter formatter = new();
         public override void SaveFile(string directory, string fileName, object data)
         {
             string filePath = GetFilePath(directory, fileName);
@@ -17,7 +16,9 @@ namespace Floofinator.SimpleSave
             if (!DirectoryExists(directory)) CreateDirectory(directory);
 
             using FileStream stream = new(filePath, FileMode.Create);
-            formatter.Serialize(stream, data);
+            using StreamWriter writer = new(stream);
+            var xml = new XmlSerializer(data.GetType());
+            xml.Serialize(writer, data);
 
             // Debug.Log($"Saved file to \"{filePath}\".");
         }
@@ -33,7 +34,9 @@ namespace Floofinator.SimpleSave
             }
 
             using FileStream stream = new(filePath, FileMode.Open);
-            data = formatter.Deserialize(stream);
+            using StreamReader reader = new(stream);
+            var xml = new XmlSerializer(saveType);
+            data = xml.Deserialize(stream);
 
             // Debug.Log($"Loaded file from \"{filePath}\".");
 

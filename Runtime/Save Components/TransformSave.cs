@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System;
 using UnityEngine;
 
 namespace Floofinator.SimpleSave
@@ -31,16 +30,16 @@ namespace Floofinator.SimpleSave
                 rigidbody.rotation = transform.rotation;
             }
         }
-        public virtual Type GetSaveType()
+        public virtual System.Type GetSaveType()
         {
             return typeof(TransformData);
         }
-        [Serializable]
+        [System.Serializable]
         public struct TransformData
         {
-            public Vector3 Position;
-            public Quaternion Rotation;
-            public Vector3 Scale;
+            public SaveVector3 Position;
+            public SaveQuaternion Rotation;
+            public SaveVector3 Scale;
         }
     }
 }

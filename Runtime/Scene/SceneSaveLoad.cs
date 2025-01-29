@@ -9,38 +9,50 @@ namespace Floofinator.SimpleSave
 {
     public class SceneSaveLoad : MonoBehaviour
     {
-        public JsonFiler Filer => jsonFiler;
+        [SerializeField] bool loadOnStart = true;
+        [SerializeField] bool saveOnQuit = true;
+        [SerializeField] bool saveOnSceneUnload = true;
         public UnityEvent OnNoSave, OnLoaded, OnSaved;
-        JsonFiler jsonFiler;
         private void Awake()
         {
             SceneManager.sceneUnloaded += OnSceneUnloaded;
         }
         void Start()
         {
-            jsonFiler = new();
-            bool loaded = SceneFiler.LoadScene(jsonFiler);
+            if (loadOnStart) Load();
+        }
+        public bool Load()
+        {
+            if (Filer.Instance == null)
+            {
+                Debug.LogError("No filer instance to load with! Please set the filer before attempting to load the scene.");
+                return false;
+            }
+
+            bool loaded = SceneFiler.LoadScene(Filer.Instance);
 
             if (loaded) OnLoaded?.Invoke();
             else OnNoSave?.Invoke();
-        }
-        private void OnDestroy()
-        {
-            print("Destroyed");
+
+            return loaded;
         }
         private void OnSceneUnloaded(Scene arg0)
         {
-            print("Unloaded");
-            Save();
+            if (saveOnSceneUnload) Save();
         }
         private void OnApplicationQuit()
         {
-            print("Quit");
-            Save();
+            if (saveOnQuit) Save();
         }
         public void Save()
         {
-            SceneFiler.SaveScene(jsonFiler);
+            if (Filer.Instance == null)
+            {
+                Debug.LogError("No filer instance to save with! Please set the filer before attempting to save the scene.");
+                return;
+            }
+
+            SceneFiler.SaveScene(Filer.Instance);
             OnSaved?.Invoke();
         }
     }
