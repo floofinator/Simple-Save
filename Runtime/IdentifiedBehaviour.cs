@@ -18,6 +18,16 @@ namespace Floofinator.SimpleSave
         {
             ParentObject = GetComponentInParent<IdentifiedObject>();
         }
+        bool HasValidParents()
+        {
+            IdentifiedObject parent = ParentObject;
+            while (parent)
+            {
+                if (parent.HasEmptyID) return false;
+                parent = parent.ParentObject;
+            }
+            return true;
+        }
         string GetParentID()
         {
             if (ParentObject) return ParentObject.DictionaryID + '.';
@@ -31,12 +41,18 @@ namespace Floofinator.SimpleSave
                 Debug.LogWarning("ID is empty for \"" + gameObject.name + "\" it will not be added.");
                 return;
             }
+            if (!HasValidParents())
+            {
+                Debug.LogWarning("ID is empty for a parent of\"" + gameObject.name + "\" it will not be added yet.");
+                return;
+            }
             if (ID_DICTIONARY.ContainsKey(DictionaryID))
             {
                 Debug.LogWarning("ID \"" + DictionaryID + "\" already exists for \"" + gameObject.name + "\" it will not be added.");
                 return;
             }
             ID_DICTIONARY.Add(DictionaryID, this);
+            print("ID \"" + DictionaryID + "\" added for \"" + gameObject.name + "\"");
         }
         public void RemoveFromDictionary()
         {
@@ -46,6 +62,7 @@ namespace Floofinator.SimpleSave
                 return;
             }
             ID_DICTIONARY.Remove(DictionaryID);
+            print("ID \"" + DictionaryID + "\" removed for \"" + gameObject.name + "\"");
         }
         protected virtual void OnDestroy()
         {
