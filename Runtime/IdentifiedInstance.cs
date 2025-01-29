@@ -26,6 +26,15 @@ namespace Floofinator.SimpleSave
         public void AssignInstanceID(string newId)
         {
             id = newId;
+            IdentifiedBehaviour[] children = GetComponentsInChildren<IdentifiedBehaviour>();
+            foreach (var identity in children)
+            {
+                identity.IdentifyParent();
+            }
+            foreach (var identity in children)
+            {
+                identity.AddToDictionary();
+            }
         }
         public void GenerateInstanceID()
         {
