@@ -49,6 +49,8 @@ namespace Floofinator.SimpleSave
                 filer.SaveFile(directory, $"{identity.ID}.save", saveable.Save());
             }
 
+            Debug.Log("Data saved.");
+
             filer.Compress();
         }
         public static void ClearScene(Filer filer)
@@ -71,7 +73,9 @@ namespace Floofinator.SimpleSave
 
             //load instances first before loading data so that they can be identified
             LoadDirectoryInstances(filer, sceneName);
+            Debug.Log("Instances re-instantiated.");
             LoadDirectory(filer, sceneName);
+            Debug.Log("Data loaded.");
 
             filer.CleanUpUnCompress();
 
