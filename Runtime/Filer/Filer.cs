@@ -28,7 +28,7 @@ namespace Floofinator.SimpleSave
 
             ZipFile.CreateFromDirectory(Root, fileName, System.IO.Compression.CompressionLevel.Fastest, false);
             
-            Directory.Delete(Root, true);
+            // Directory.Delete(Root, true);
         }
         public void UnCompress()
         {
@@ -57,6 +57,13 @@ namespace Floofinator.SimpleSave
         public bool FileExists(string directory, string fileName)
         {
             return File.Exists(Path.Combine(Root, directory, fileName));
+        }
+        public void RenameFile(string directory, string fileName, string newName)
+        {
+            if (File.Exists(Path.Combine(Root, directory, fileName)))
+            {
+                File.Move(Path.Combine(Root, directory, fileName), Path.Combine(Root, directory, newName));
+            }
         }
         public void DeleteDirectory(string directory)
         {
