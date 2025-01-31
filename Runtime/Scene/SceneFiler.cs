@@ -30,7 +30,7 @@ namespace Floofinator.SimpleSave
 
             filer.CreateDirectory(sceneName);
             
-            Debug.Log(filer.DirectoryExists(sceneName));
+            // Debug.Log(filer.DirectoryExists(sceneName));
 
             foreach (var identity in IdentifiedBehaviour.ID_DICTIONARY.Values)
             {
