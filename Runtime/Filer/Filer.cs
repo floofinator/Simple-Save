@@ -10,7 +10,7 @@ namespace Floofinator.SimpleSave
     public abstract class Filer
     {
         public static Filer Instance;
-        public string Root {get; set;}
+        public string Root
         public Filer() : this("") { }
         public Filer(string root)
         {
