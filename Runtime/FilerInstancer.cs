@@ -7,6 +7,7 @@ namespace Floofinator.SimpleSave
     public class FilerInstancer : MonoBehaviour
     {
         [SerializeField] FilerType type = FilerType.JSON;
+        [SerializeField] bool replace = true;
         [SerializeField] string saveRoot = "";
         enum FilerType 
         {
@@ -14,6 +15,8 @@ namespace Floofinator.SimpleSave
         }
         private void Awake()
         {
+            if (Filer.Instance != null && !replace) return;
+
             switch (type)
             {
                 case FilerType.JSON:

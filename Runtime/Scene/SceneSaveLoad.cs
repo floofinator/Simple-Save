@@ -10,7 +10,7 @@ namespace Floofinator.SimpleSave
     public class SceneSaveLoad : MonoBehaviour
     {
         [SerializeField] bool loadOnStart = true;
-        [SerializeField] bool saveOnDestroy = true;
+        [SerializeField] bool saveOnDisable = true;
         public UnityEvent OnNoSave, OnLoaded, OnSaved;
         void Start()
         {
@@ -31,9 +31,9 @@ namespace Floofinator.SimpleSave
 
             return loaded;
         }
-        private void OnDestroy()
+        private void OnDisable()
         {
-            if (saveOnDestroy) Save();
+            if (saveOnDisable) Save();
         }
         public void Save()
         {
