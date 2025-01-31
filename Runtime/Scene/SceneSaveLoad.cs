@@ -10,13 +10,8 @@ namespace Floofinator.SimpleSave
     public class SceneSaveLoad : MonoBehaviour
     {
         [SerializeField] bool loadOnStart = true;
-        [SerializeField] bool saveOnQuit = true;
-        [SerializeField] bool saveOnSceneUnload = true;
+        [SerializeField] bool saveOnDestroy = true;
         public UnityEvent OnNoSave, OnLoaded, OnSaved;
-        private void Awake()
-        {
-            SceneManager.sceneUnloaded += OnSceneUnloaded;
-        }
         void Start()
         {
             if (loadOnStart) Load();
@@ -36,14 +31,9 @@ namespace Floofinator.SimpleSave
 
             return loaded;
         }
-        private void OnSceneUnloaded(Scene scene)
+        private void OnDestroy()
         {
-            if (scene != gameObject.scene) return;
-            if (saveOnSceneUnload) Save();
-        }
-        private void OnApplicationQuit()
-        {
-            if (saveOnQuit) Save();
+            if (saveOnDestroy) Save();
         }
         public void Save()
         {
