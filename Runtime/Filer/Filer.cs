@@ -10,44 +10,47 @@ namespace Floofinator.SimpleSave
     public abstract class Filer
     {
         public static Filer Instance;
-        public string Root {get; private set;}
+        public string Root {get; set;}
         public Filer() : this("") { }
         public Filer(string root)
         {
-            SetRoot(root);
+            Root = root;
         }
-        public void SetRoot(string root) { Root = Path.Combine(Application.persistentDataPath, "SaveData", root); }
+        string GetSystemRoot()
+        {
+            return Path.Combine(Application.persistentDataPath, "SaveData", Root);
+        }
         public void Compress()
         {
-            if (!Directory.Exists(Root)) return;
-            string directory = Path.GetDirectoryName(Root);
-            string name = Path.GetFileName(Root);
+            if (!Directory.Exists(GetSystemRoot())) return;
+            string directory = Path.GetDirectoryName(GetSystemRoot());
+            string name = Path.GetFileName(GetSystemRoot());
             string fileName = Path.Combine(directory, name + ".save");
 
             if (File.Exists(fileName)) File.Delete(fileName);
 
-            ZipFile.CreateFromDirectory(Root, fileName, System.IO.Compression.CompressionLevel.Fastest, false);
+            ZipFile.CreateFromDirectory(GetSystemRoot(), fileName, System.IO.Compression.CompressionLevel.Fastest, false);
             
-            Directory.Delete(Root, true);
+            Directory.Delete(GetSystemRoot(), true);
         }
         public void UnCompress()
         {
-            string directory = Path.GetDirectoryName(Root);
-            string name = Path.GetFileName(Root);
+            string directory = Path.GetDirectoryName(GetSystemRoot());
+            string name = Path.GetFileName(GetSystemRoot());
             string fileName = Path.Combine(directory, name + ".save");
 
             if (!File.Exists(fileName)) return;
-            if (Directory.Exists(Root)) Directory.Delete(Root, true);
+            if (Directory.Exists(GetSystemRoot())) Directory.Delete(GetSystemRoot(), true);
 
-            ZipFile.ExtractToDirectory(fileName, Root);
+            ZipFile.ExtractToDirectory(fileName, GetSystemRoot());
         }
         public void DeleteUnCompress()
         {
-            if (Directory.Exists(Root)) Directory.Delete(Root, true);
+            if (Directory.Exists(GetSystemRoot())) Directory.Delete(GetSystemRoot(), true);
         }
         public void DeleteFile(string directory, string fileName)
         {
-            string directoryPath = Path.Combine(Root, directory);
+            string directoryPath = Path.Combine(GetSystemRoot(), directory);
             string filePath = Path.Combine(directoryPath, fileName);
 
             if (File.Exists(filePath)) File.Delete(filePath);
@@ -56,24 +59,24 @@ namespace Floofinator.SimpleSave
         }
         public bool FileExists(string directory, string fileName)
         {
-            return File.Exists(Path.Combine(Root, directory, fileName));
+            return File.Exists(Path.Combine(GetSystemRoot(), directory, fileName));
         }
         public void RenameFile(string directory, string fileName, string newName)
         {
-            if (File.Exists(Path.Combine(Root, directory, fileName)))
+            if (File.Exists(Path.Combine(GetSystemRoot(), directory, fileName)))
             {
-                File.Move(Path.Combine(Root, directory, fileName), Path.Combine(Root, directory, newName));
+                File.Move(Path.Combine(GetSystemRoot(), directory, fileName), Path.Combine(GetSystemRoot(), directory, newName));
             }
         }
         public void DeleteDirectory(string directory)
         {
-            string directoryPath = Path.Combine(Root, directory);
+            string directoryPath = Path.Combine(GetSystemRoot(), directory);
 
             if (Directory.Exists(directoryPath)) Directory.Delete(directoryPath, true);
         }
         public string[] GetDirectories(string directory)
         {
-            string directoryPath = Path.Combine(Root, directory);
+            string directoryPath = Path.Combine(GetSystemRoot(), directory);
 
             return PathsToNames(Directory.GetDirectories(directoryPath));
         }
@@ -90,22 +93,22 @@ namespace Floofinator.SimpleSave
         }
         public string[] GetFiles(string directory)
         {
-            string directoryPath = Path.Combine(Root, directory);
+            string directoryPath = Path.Combine(GetSystemRoot(), directory);
             return PathsToNames(Directory.GetFiles(directoryPath));
         }
         public bool DirectoryExists(string directory)
         {
-            return Directory.Exists(Path.Combine(Root, directory));
+            return Directory.Exists(Path.Combine(GetSystemRoot(), directory));
         }
         public void CreateDirectory(string directory)
         {
-            string directoryPath = Path.Combine(Root, directory);
+            string directoryPath = Path.Combine(GetSystemRoot(), directory);
 
             if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
         }
         public string GetFilePath(string directory, string fileName)
         {
-            string directoryPath = Path.Combine(Root, directory);
+            string directoryPath = Path.Combine(GetSystemRoot(), directory);
             return Path.Combine(directoryPath, fileName);
         }
         public abstract void SaveFile(string directory, string fileName, object data);
