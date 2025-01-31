@@ -36,8 +36,9 @@ namespace Floofinator.SimpleSave
 
             return loaded;
         }
-        private void OnSceneUnloaded(Scene arg0)
+        private void OnSceneUnloaded(Scene scene)
         {
+            if (scene != gameObject.scene) return;
             if (saveOnSceneUnload) Save();
         }
         private void OnApplicationQuit()
