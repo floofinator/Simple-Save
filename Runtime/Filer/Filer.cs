@@ -28,7 +28,7 @@ namespace Floofinator.SimpleSave
 
             ZipFile.CreateFromDirectory(Root, fileName, System.IO.Compression.CompressionLevel.Fastest, false);
             
-            // Directory.Delete(Root, true);
+            Directory.Delete(Root, true);
         }
         public void UnCompress()
         {

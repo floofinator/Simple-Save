@@ -28,7 +28,9 @@ namespace Floofinator.SimpleSave
         {
             string sceneName = GetSceneName();
 
-            filer.DeleteDirectory(sceneName);
+            filer.CreateDirectory(sceneName);
+            
+            Debug.Log(filer.DirectoryExists(sceneName));
 
             foreach (var identity in IdentifiedBehaviour.ID_DICTIONARY.Values)
             {
