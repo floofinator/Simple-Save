@@ -30,7 +30,7 @@ namespace Floofinator.SimpleSave
                     break;
             }
 
-            Filer.Instance.SetRoot(saveRoot);
+            Filer.Instance.Root = saveRoot;
         }
     }
 }
