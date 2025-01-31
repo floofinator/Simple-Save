@@ -77,7 +77,7 @@ namespace Floofinator.SimpleSave
             LoadDirectory(filer, sceneName);
             Debug.Log("Data loaded.");
 
-            filer.CleanUpUnCompress();
+            filer.DeleteUnCompress();
 
             return true;
         }
