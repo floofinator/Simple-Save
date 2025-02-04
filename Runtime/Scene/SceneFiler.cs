@@ -150,7 +150,8 @@ namespace Floofinator.SimpleSave
 
             foreach (var dataName in filer.GetFiles(directory))
             {
-                string dictionaryID = parentID + "." + Path.GetFileNameWithoutExtension(dataName);
+                string dictionaryID = Path.GetFileNameWithoutExtension(dataName);
+                if (!string.IsNullOrWhiteSpace(parentID)) dictionaryID = parentID + "." + dictionaryID;
                 if (IdentifiedBehaviour.ID_DICTIONARY.TryGetValue(dictionaryID, out IdentifiedBehaviour identity))
                 {
                     if (identity is ISaveable saveable)
