@@ -22,7 +22,7 @@ namespace Floofinator.SimpleSave
             TransformData data = (TransformData)saveData;
             if (local) transform.SetLocalPositionAndRotation(data.Position, data.Rotation);
             else transform.SetPositionAndRotation(data.Position, data.Rotation);
-            transform.localScale = transform.localScale;
+            transform.localScale = data.Scale;
 
             if (TryGetComponent(out Rigidbody rigidbody))
             {
