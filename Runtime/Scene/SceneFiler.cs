@@ -17,7 +17,7 @@ namespace Floofinator.SimpleSave
             private set
             {
                 _progress = value;
-                OnProgressChanged.Invoke(value);
+                OnProgressChanged?.Invoke(value);
             }
         }
         public static event Action<float> OnProgressChanged;
