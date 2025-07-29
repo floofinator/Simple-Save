@@ -52,7 +52,7 @@ namespace Floofinator.SimpleSave
                 return;
             }
             ID_DICTIONARY.Add(DictionaryID, this);
-            print("ID \"" + DictionaryID + "\" added for \"" + gameObject.name + "\"");
+            print("ID \"" + DictionaryID + "\" added for GameObject \"" + gameObject.name + "\"");
         }
         public void RemoveFromDictionary()
         {
@@ -62,7 +62,7 @@ namespace Floofinator.SimpleSave
                 return;
             }
             ID_DICTIONARY.Remove(DictionaryID);
-            print("ID \"" + DictionaryID + "\" removed for \"" + gameObject.name + "\"");
+            print("ID \"" + DictionaryID + "\" removed for GameObject \"" + gameObject.name + "\"");
         }
         protected virtual void OnDestroy()
         {

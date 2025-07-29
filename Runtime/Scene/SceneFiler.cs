@@ -126,7 +126,7 @@ namespace Floofinator.SimpleSave
         {
             Progress = 0;
 
-            SetSceneActive(false);
+            // SetSceneActive(false);
             yield return null;
 
             //load instances first before loading data so that they can be identified
@@ -136,7 +136,7 @@ namespace Floofinator.SimpleSave
             yield return LoadDirectory(sceneName, sceneName);
 
             yield return null;
-            SetSceneActive(true);
+            // SetSceneActive(true);
 
             Debug.Log("Data for scene \"" + sceneName + "\" loaded.");
 
