@@ -12,7 +12,7 @@ namespace Floofinator.SimpleSave
     {
         [SerializeField] bool loadOnStart = true;
         [SerializeField] bool saveOnQuit = true;
-        public UnityEvent OnNoSave, OnLoaded, OnSaved;
+        public UnityEvent OnNoData, OnLoaded, OnSaved;
         string sceneName = "";
         void Start()
         {
@@ -34,31 +34,28 @@ namespace Floofinator.SimpleSave
 
                 if (hasSave)
                 {
-                    yield return SceneFiler.LoadScene(sceneName);
+                    yield return SceneFiler.Load(sceneName);
                     OnLoaded?.Invoke();
                 }
                 else
-                    OnNoSave?.Invoke();
+                    OnNoData?.Invoke();
             }
         }
         private void OnApplicationQuit()
         {
-            if (saveOnQuit) Save();
+            if (saveOnQuit) SceneFiler.SaveInstant(sceneName);
         }
-        public void Save()
+        public IEnumerator Save()
         {
             if (SceneFiler.Filer == null)
             {
                 Debug.LogError("No filer instance to save with! Please set the filer before attempting to save the scene.");
-                return;
             }
-
-            IEnumerator saveRoutine = SceneFiler.SaveScene(sceneName);
-            while (saveRoutine.MoveNext())
+            else
             {
-                // execute entire coroutine instantly
+                yield return SceneFiler.Save(sceneName);
+                OnSaved?.Invoke();
             }
-            OnSaved?.Invoke();
         }
     }
 }

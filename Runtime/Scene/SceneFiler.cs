@@ -41,14 +41,22 @@ namespace Floofinator.SimpleSave
                 identity.AddToDictionary();
             }
         }
-        static void SetIdentifiedActive(bool active)
+        static void SetSceneActive(bool active)
         {
-            foreach (IdentifiedBehaviour identity in IdentifiedBehaviour.ID_DICTIONARY.Values)
+            foreach (GameObject gameObject in SceneManager.GetActiveScene().GetRootGameObjects())
             {
-                identity.gameObject.SetActive(active);
+                gameObject.SetActive(active);
             }
         }
-        public static IEnumerator SaveScene(string sceneName)
+        public static void SaveInstant(string sceneName)
+        {
+            IEnumerator saveRoutine = Save(sceneName);
+            while (saveRoutine.MoveNext())
+            {
+                // execute entire coroutine instantly
+            }
+        }
+        public static IEnumerator Save(string sceneName)
         {
             Progress = 0;
             CurrentStage = FilingStage.SAVING;
@@ -76,7 +84,7 @@ namespace Floofinator.SimpleSave
                 yield return null;
             }
 
-            Debug.Log("Data saved.");
+            Debug.Log("Data for scene \"" + sceneName + "\" saved.");
 
             CurrentStage = FilingStage.IDLE;
         }
@@ -104,13 +112,21 @@ namespace Floofinator.SimpleSave
         public static void RevertProgressFraction()
         {
             ProgressIncrement = LastProgressIncrement;
-         }
-        public static IEnumerator LoadScene(string sceneName)
+        }
+        public static void LoadInstant(string sceneName)
+        {
+            IEnumerator loadRoutine = Load(sceneName);
+            while (loadRoutine.MoveNext())
+            {
+                // execute entire coroutine instantly
+            }
+        }
+        public static IEnumerator Load(string sceneName)
         {
             Progress = 0;
 
             InitializeIdentification();
-            SetIdentifiedActive(false);
+            SetSceneActive(false);
             yield return null;
 
             //load instances first before loading data so that they can be identified
@@ -120,7 +136,9 @@ namespace Floofinator.SimpleSave
             yield return LoadDirectory(sceneName, sceneName);
 
             yield return null;
-            SetIdentifiedActive(true);
+            SetSceneActive(true);
+
+            Debug.Log("Data for scene \"" + sceneName + "\" loaded.");
 
             CurrentStage = FilingStage.IDLE;
         }
