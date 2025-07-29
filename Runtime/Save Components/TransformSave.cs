@@ -6,6 +6,10 @@ namespace Floofinator.SimpleSave
 {
     public class TransformSave : IdentifiedBehaviour, ISaveable
     {
+        private void Awake()
+        {
+            print("Awake " + gameObject.name);
+        }
         public virtual object Save()
         {
             TransformData data = new()

@@ -47,7 +47,7 @@ namespace Floofinator.SimpleSave
             
             foreach (IdentifiedBehaviour identity in IdentifiedBehaviour.ID_DICTIONARY.Values)
             {
-                identity.enabled = active;
+                identity.gameObject.SetActive(active);
             }
         }
         public static void SaveInstant(string sceneName)
@@ -132,7 +132,9 @@ namespace Floofinator.SimpleSave
 
             //load instances first before loading data so that they can be identified
             yield return LoadDirectoryInstances(sceneName, sceneName);
+
             yield return null;
+            
 
             yield return LoadDirectory(sceneName, sceneName);
 
@@ -203,10 +205,9 @@ namespace Floofinator.SimpleSave
 
             instance.GetComponent<IdentifiedInstance>().AssignInstanceID(instanceID);
 
-            foreach (IdentifiedBehaviour behaviour in instance.GetComponentsInChildren<IdentifiedBehaviour>(true))
-            {
-                behaviour.enabled = false;
-            }
+            instance.SetActive(false);
+
+            if (LogVerbose) Debug.Log("Instantiated \"" + prefabName + "\" with ID " + instanceID);
         }
         //this needs to be fixed to account for parent ids in the directory heirarchy
         static string GetIDFromDirectory(string directory, string sceneName)
