@@ -26,7 +26,7 @@ namespace Floofinator.SimpleSave
         public void AssignInstanceID(string newId)
         {
             id = newId;
-            IdentifiedBehaviour[] children = GetComponentsInChildren<IdentifiedBehaviour>();
+            IdentifiedBehaviour[] children = GetComponentsInChildren<IdentifiedBehaviour>(true);
             foreach (var identity in children)
             {
                 identity.IdentifyParent();

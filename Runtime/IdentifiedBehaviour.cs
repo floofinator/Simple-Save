@@ -16,7 +16,7 @@ namespace Floofinator.SimpleSave
         public static Dictionary<string, IdentifiedBehaviour> ID_DICTIONARY = new();
         public virtual void IdentifyParent()
         {
-            ParentObject = GetComponentInParent<IdentifiedObject>();
+            ParentObject = GetComponentInParent<IdentifiedObject>(true);
         }
         bool HasValidParents()
         {

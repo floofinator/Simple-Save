@@ -13,7 +13,7 @@ namespace Floofinator.SimpleSave
         {
             if (transform.parent == null) return;
             //if this is a prefab id and we want to see if there is one in parent
-            ParentObject = transform.parent.GetComponentInParent<IdentifiedObject>();
+            ParentObject = transform.parent.GetComponentInParent<IdentifiedObject>(true);
         }
     }
 }
