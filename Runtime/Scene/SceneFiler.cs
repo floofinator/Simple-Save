@@ -201,7 +201,9 @@ namespace Floofinator.SimpleSave
                 parent = identity.transform;
             }
 
-            GameObject instance = GameObject.Instantiate(prefab, parent);
+            GameObject instance = GameObject.Instantiate(prefab);
+
+            instance.transform.SetParent(parent);
 
             instance.GetComponent<IdentifiedInstance>().AssignInstanceID(instanceID);
 
