@@ -43,9 +43,10 @@ namespace Floofinator.SimpleSave
         }
         static void SetSceneActive(bool active)
         {
-            foreach (GameObject gameObject in SceneManager.GetActiveScene().GetRootGameObjects())
+            
+            foreach (IdentifiedBehaviour identity in IdentifiedBehaviour.ID_DICTIONARY.Values)
             {
-                gameObject.SetActive(active);
+                identity.gameObject.SetActive(active);
             }
         }
         public static void SaveInstant(string sceneName)
