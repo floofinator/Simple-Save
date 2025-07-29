@@ -31,7 +31,7 @@ namespace Floofinator.SimpleSave
         public static void InitializeIdentification()
         {
             IdentifiedBehaviour.ID_DICTIONARY.Clear();
-            IdentifiedBehaviour[] all = GameObject.FindObjectsOfType<IdentifiedBehaviour>();
+            IdentifiedBehaviour[] all = GameObject.FindObjectsOfType<IdentifiedBehaviour>(true);
             foreach (IdentifiedBehaviour identity in all)
             {
                 identity.IdentifyParent();
@@ -126,7 +126,7 @@ namespace Floofinator.SimpleSave
         {
             Progress = 0;
 
-            // SetSceneActive(false);
+            SetSceneActive(false);
             yield return null;
 
             //load instances first before loading data so that they can be identified
@@ -136,7 +136,7 @@ namespace Floofinator.SimpleSave
             yield return LoadDirectory(sceneName, sceneName);
 
             yield return null;
-            // SetSceneActive(true);
+            SetSceneActive(true);
 
             Debug.Log("Data for scene \"" + sceneName + "\" loaded.");
 
