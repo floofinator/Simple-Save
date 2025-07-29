@@ -38,12 +38,12 @@ namespace Floofinator.SimpleSave
         {
             if (HasEmptyID)
             {
-                // Debug.LogWarning("ID is empty for \"" + gameObject.name + "\" it will not be added.");
+                Debug.LogWarning("ID is empty for \"" + gameObject.name + "\" it will not be added.");
                 return;
             }
             if (!HasValidParents())
             {
-                // Debug.LogWarning("ID is empty for a parent of\"" + gameObject.name + "\" it will not be added yet.");
+                Debug.LogWarning("ID is empty for a parent of\"" + gameObject.name + "\" it will not be added yet.");
                 return;
             }
             if (ID_DICTIONARY.ContainsKey(DictionaryID))
@@ -52,7 +52,7 @@ namespace Floofinator.SimpleSave
                 return;
             }
             ID_DICTIONARY.Add(DictionaryID, this);
-            // print("ID \"" + DictionaryID + "\" added for \"" + gameObject.name + "\"");
+            print("ID \"" + DictionaryID + "\" added for \"" + gameObject.name + "\"");
         }
         public void RemoveFromDictionary()
         {
@@ -62,7 +62,7 @@ namespace Floofinator.SimpleSave
                 return;
             }
             ID_DICTIONARY.Remove(DictionaryID);
-            // print("ID \"" + DictionaryID + "\" removed for \"" + gameObject.name + "\"");
+            print("ID \"" + DictionaryID + "\" removed for \"" + gameObject.name + "\"");
         }
         protected virtual void OnDestroy()
         {

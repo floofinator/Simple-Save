@@ -28,7 +28,7 @@ namespace Floofinator.SimpleSave
             IDLE, INSTANCING, LOADING, SAVING
         }
         public static FilingStage CurrentStage;
-        static void InitializeIdentification()
+        public static void InitializeIdentification()
         {
             IdentifiedBehaviour.ID_DICTIONARY.Clear();
             IdentifiedBehaviour[] all = GameObject.FindObjectsOfType<IdentifiedBehaviour>();
@@ -126,7 +126,6 @@ namespace Floofinator.SimpleSave
         {
             Progress = 0;
 
-            InitializeIdentification();
             SetSceneActive(false);
             yield return null;
 
