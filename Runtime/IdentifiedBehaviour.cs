@@ -14,6 +14,7 @@ namespace Floofinator.SimpleSave
         public bool HasEmptyID => string.IsNullOrWhiteSpace(ID);
         public IdentifiedObject ParentObject {get; protected set;}
         public static Dictionary<string, IdentifiedBehaviour> ID_DICTIONARY = new();
+        public static bool LogVerbose = false;
         public virtual void IdentifyParent()
         {
             ParentObject = GetComponentInParent<IdentifiedObject>(true);
@@ -52,7 +53,7 @@ namespace Floofinator.SimpleSave
                 return;
             }
             ID_DICTIONARY.Add(DictionaryID, this);
-            print("ID \"" + DictionaryID + "\" added for GameObject \"" + gameObject.name + "\"");
+            if (LogVerbose) print("ID \"" + DictionaryID + "\" added for GameObject \"" + gameObject.name + "\"");
         }
         public void RemoveFromDictionary()
         {
@@ -62,7 +63,7 @@ namespace Floofinator.SimpleSave
                 return;
             }
             ID_DICTIONARY.Remove(DictionaryID);
-            print("ID \"" + DictionaryID + "\" removed for GameObject \"" + gameObject.name + "\"");
+            if (LogVerbose) print("ID \"" + DictionaryID + "\" removed for GameObject \"" + gameObject.name + "\"");
         }
         protected virtual void OnDestroy()
         {

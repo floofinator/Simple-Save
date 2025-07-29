@@ -28,6 +28,7 @@ namespace Floofinator.SimpleSave
             IDLE, INSTANCING, LOADING, SAVING
         }
         public static FilingStage CurrentStage;
+        public static bool LogVerbose = false;
         public static void InitializeIdentification()
         {
             IdentifiedBehaviour.ID_DICTIONARY.Clear();
@@ -46,7 +47,7 @@ namespace Floofinator.SimpleSave
             
             foreach (IdentifiedBehaviour identity in IdentifiedBehaviour.ID_DICTIONARY.Values)
             {
-                identity.gameObject.SetActive(active);
+                identity.enabled = active;
             }
         }
         public static void SaveInstant(string sceneName)
@@ -85,7 +86,7 @@ namespace Floofinator.SimpleSave
                 yield return null;
             }
 
-            Debug.Log("Data for scene \"" + sceneName + "\" saved.");
+            if (LogVerbose) Debug.Log("Data for scene \"" + sceneName + "\" saved.");
 
             CurrentStage = FilingStage.IDLE;
         }
@@ -93,7 +94,7 @@ namespace Floofinator.SimpleSave
         {
             Filer.DeleteDirectory(sceneName);
 
-            Debug.Log($"Cleared save data for \"{sceneName}\"");
+            if (LogVerbose) Debug.Log($"Cleared save data for \"{sceneName}\"");
         }
 
         public static bool HasScene(string sceneName)
@@ -138,7 +139,7 @@ namespace Floofinator.SimpleSave
             yield return null;
             SetSceneActive(true);
 
-            Debug.Log("Data for scene \"" + sceneName + "\" loaded.");
+            if (LogVerbose) Debug.Log("Data for scene \"" + sceneName + "\" loaded.");
 
             CurrentStage = FilingStage.IDLE;
         }
@@ -202,7 +203,10 @@ namespace Floofinator.SimpleSave
 
             instance.GetComponent<IdentifiedInstance>().AssignInstanceID(instanceID);
 
-            instance.SetActive(false);
+            foreach (IdentifiedBehaviour behaviour in instance.GetComponentsInChildren<IdentifiedBehaviour>(true))
+            {
+                behaviour.enabled = false;
+            }
         }
         //this needs to be fixed to account for parent ids in the directory heirarchy
         static string GetIDFromDirectory(string directory, string sceneName)

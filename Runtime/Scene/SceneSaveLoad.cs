@@ -10,12 +10,16 @@ namespace Floofinator.SimpleSave
 {
     public class SceneSaveLoad : MonoBehaviour
     {
+        [SerializeField] bool logVerbose = false;
         [SerializeField] bool loadOnStart = true;
         [SerializeField] bool saveOnQuit = true;
         public UnityEvent OnNoData, OnLoaded, OnSaved;
         string sceneName = "";
         void Start()
         {
+            SceneFiler.LogVerbose = logVerbose;
+            IdentifiedBehaviour.LogVerbose = logVerbose;
+
             SceneFiler.InitializeIdentification();
 
             sceneName = SceneManager.GetActiveScene().name;
