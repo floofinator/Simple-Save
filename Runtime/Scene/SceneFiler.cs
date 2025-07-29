@@ -10,29 +10,52 @@ namespace Floofinator.SimpleSave
 {
     public static class SceneFiler
     {
-        static string GetSceneName() => SceneManager.GetActiveScene().name;
+        public static Filer Filer;
+        static float _progress = 0;
+        public static float Progress {
+            get => _progress;
+            private set
+            {
+                _progress = value;
+                OnProgressChanged.Invoke(value);
+            }
+        }
+        public static event Action<float> OnProgressChanged;
+        static float LastProgressIncrement = 1.0f;
+        static float ProgressIncrement = 1.0f;
+        public enum FilingStage
+        {
+            IDLE, INSTANCING, LOADING, SAVING
+        }
+        public static FilingStage CurrentStage;
         static void InitializeIdentification()
         {
             IdentifiedBehaviour.ID_DICTIONARY.Clear();
             IdentifiedBehaviour[] all = GameObject.FindObjectsOfType<IdentifiedBehaviour>();
-            foreach (var identity in all)
+            foreach (IdentifiedBehaviour identity in all)
             {
                 identity.IdentifyParent();
             }
-            foreach (var identity in all)
+            foreach (IdentifiedBehaviour identity in all)
             {
                 identity.AddToDictionary();
             }
         }
-        public static void SaveScene(Filer filer)
+        static void SetIdentifiedActive(bool active)
         {
-            string sceneName = GetSceneName();
+            foreach (IdentifiedBehaviour identity in IdentifiedBehaviour.ID_DICTIONARY.Values)
+            {
+                identity.gameObject.SetActive(active);
+            }
+        }
+        public static IEnumerator SaveScene(string sceneName)
+        {
+            Progress = 0;
+            CurrentStage = FilingStage.SAVING;
 
-            filer.CreateDirectory(sceneName);
-            
-            // Debug.Log(filer.DirectoryExists(sceneName));
+            Filer.CreateDirectory(sceneName);
 
-            foreach (var identity in IdentifiedBehaviour.ID_DICTIONARY.Values)
+            foreach (IdentifiedBehaviour identity in IdentifiedBehaviour.ID_DICTIONARY.Values)
             {
                 if (identity is not ISaveable saveable) continue;
 
@@ -46,73 +69,104 @@ namespace Floofinator.SimpleSave
                 }
 
                 string directory = Path.Combine(sceneName, dataPath);
-                if (!filer.DirectoryExists(directory)) filer.CreateDirectory(directory);
+                if (!Filer.DirectoryExists(directory)) Filer.CreateDirectory(directory);
 
-                filer.SaveFile(directory, $"{identity.ID}.save", saveable.Save());
+                Filer.SaveFile(directory, $"{identity.ID}.save", saveable.Save());
+
+                yield return null;
             }
 
             Debug.Log("Data saved.");
 
-            filer.Compress();
+            CurrentStage = FilingStage.IDLE;
         }
-        public static void ClearScene(Filer filer)
+        public static void ClearScene(string sceneName)
         {
-            string sceneName = GetSceneName();
-
-            filer.DeleteDirectory(sceneName);
+            Filer.DeleteDirectory(sceneName);
 
             Debug.Log($"Cleared save data for \"{sceneName}\"");
         }
-        public static bool LoadScene(Filer filer)
+
+        public static bool HasScene(string sceneName)
         {
-            filer.UnCompress();
+            return Filer.DirectoryExists(sceneName);
+        }
+
+        public static void DivideProgressFraction(string directory)
+        {
+            var files = Filer.GetDirectories(directory);
+            LastProgressIncrement = ProgressIncrement;
+            if (files.Length > 0)
+            {
+                ProgressIncrement /= files.Length;  
+            }
+        }
+        public static void RevertProgressFraction()
+        {
+            ProgressIncrement = LastProgressIncrement;
+         }
+        public static IEnumerator LoadScene(string sceneName)
+        {
+            Progress = 0;
 
             InitializeIdentification();
-
-            string sceneName = GetSceneName();
-
-            if (!filer.DirectoryExists(sceneName)) return false;
+            SetIdentifiedActive(false);
+            yield return null;
 
             //load instances first before loading data so that they can be identified
-            LoadDirectoryInstances(filer, sceneName);
-            Debug.Log("Instances re-instantiated.");
-            LoadDirectory(filer, sceneName);
-            Debug.Log("Data loaded.");
+            yield return LoadDirectoryInstances(sceneName, sceneName);
+            yield return null;
 
-            filer.DeleteUnCompress();
+            yield return LoadDirectory(sceneName, sceneName);
 
-            return true;
+            yield return null;
+            SetIdentifiedActive(true);
+
+            CurrentStage = FilingStage.IDLE;
         }
-        static void LoadDirectoryInstances(Filer filer, string directory)
+        static IEnumerator LoadDirectoryInstances(string directory, string sceneName)
         {
-            foreach (var dataName in filer.GetDirectories(directory))
+            DivideProgressFraction(directory);
+
+            CurrentStage = FilingStage.INSTANCING;
+
+            foreach (string dataName in Filer.GetDirectories(directory))
             {
                 //if this directory is an instanced object, denoted by the '#' as a starting character
                 //all the subdirectories are instance id's and need to be re-instanced
-                string dataDirectory = Path.Combine(directory,dataName);
+                string dataDirectory = Path.Combine(directory, dataName);
                 string[] splitName = dataName.Split('#');
                 if (splitName.Length > 1)
                 {
-                    foreach (var instanceDataName in filer.GetDirectories(dataDirectory))
+                    DivideProgressFraction(dataDirectory);
+                    foreach (string instanceDataName in Filer.GetDirectories(dataDirectory))
                     {
-                        CreateIdentifiedInstance(splitName[1], instanceDataName, directory);
+                        CreateIdentifiedInstance(splitName[1], instanceDataName, directory, sceneName);
+                        Progress += ProgressIncrement;
+                        yield return null;
                     }
+                    RevertProgressFraction();
                 }
-                LoadDirectoryInstances(filer, dataDirectory);
+                yield return LoadDirectoryInstances(dataDirectory, sceneName);
             }
+
+            RevertProgressFraction();
         }
-        static void LoadDirectory(Filer filer, string directory)
+        static IEnumerator LoadDirectory(string directory, string sceneName)
         {
+            CurrentStage = FilingStage.LOADING;
+
             //load data from files
-            LoadFiles(filer, directory);
+            yield return LoadFiles(directory, sceneName);
+
             //look for other directories
-            foreach (var dataName in filer.GetDirectories(directory))
+            foreach (string dataName in Filer.GetDirectories(directory))
             {
-                string dataDirectory = Path.Combine(directory,dataName);
-                LoadDirectory(filer, dataDirectory);
+                string dataDirectory = Path.Combine(directory, dataName);
+                yield return LoadDirectory(dataDirectory, sceneName);
             }
         }
-        static void CreateIdentifiedInstance(string prefabName, string instanceID, string directory)
+        static void CreateIdentifiedInstance(string prefabName, string instanceID, string directory, string sceneName)
         {
             GameObject prefab = Resources.Load<GameObject>(prefabName);
 
@@ -120,7 +174,7 @@ namespace Floofinator.SimpleSave
 
             Transform parent = null;
 
-            string dictionaryID = GetIDFromDirectory(directory);
+            string dictionaryID = GetIDFromDirectory(directory, sceneName);
             if (IdentifiedBehaviour.ID_DICTIONARY.TryGetValue(dictionaryID, out IdentifiedBehaviour identity))
             {
                 parent = identity.transform;
@@ -129,26 +183,29 @@ namespace Floofinator.SimpleSave
             GameObject instance = GameObject.Instantiate(prefab, parent);
 
             instance.GetComponent<IdentifiedInstance>().AssignInstanceID(instanceID);
+
+            instance.SetActive(false);
         }
         //this needs to be fixed to account for parent ids in the directory heirarchy
-        static string GetIDFromDirectory(string directory)
+        static string GetIDFromDirectory(string directory, string sceneName)
         {
             string parentID = "";
             string[] dataParts = directory.Split('\\');
             foreach (string id in dataParts)
             {
-                if (id == GetSceneName()) continue;
+                if (id == sceneName) continue;
                 if (id.Contains('#')) continue;
                 if (!string.IsNullOrWhiteSpace(parentID)) parentID += '.';
                 parentID += id;
             }
             return parentID;
         }
-        static void LoadFiles(Filer filer, string directory)
+        static IEnumerator LoadFiles(string directory, string sceneName)
         {
-            string parentID = GetIDFromDirectory(directory);
+            string parentID = GetIDFromDirectory(directory, sceneName);
 
-            foreach (var dataName in filer.GetFiles(directory))
+            DivideProgressFraction(directory);
+            foreach (string dataName in Filer.GetFiles(directory))
             {
                 string dictionaryID = Path.GetFileNameWithoutExtension(dataName);
                 if (!string.IsNullOrWhiteSpace(parentID)) dictionaryID = parentID + "." + dictionaryID;
@@ -156,9 +213,11 @@ namespace Floofinator.SimpleSave
                 {
                     if (identity is ISaveable saveable)
                     {
-                        if (filer.LoadFile(directory, $"{identity.ID}.save", saveable.GetSaveType(), out object data))
+                        if (Filer.LoadFile(directory, $"{identity.ID}.save", saveable.GetSaveType(), out object data))
                         {
                             saveable.Load(data);
+                            Progress += ProgressIncrement;
+                            yield return null;
                         }
                     }
                 }
@@ -167,6 +226,7 @@ namespace Floofinator.SimpleSave
                     Debug.LogWarning($"ID \"{dictionaryID}\" not found in dictionary");
                 }
             }
+            RevertProgressFraction();
         }
     }
 }

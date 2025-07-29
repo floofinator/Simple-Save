@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
@@ -12,24 +13,33 @@ namespace Floofinator.SimpleSave
         [SerializeField] bool loadOnStart = true;
         [SerializeField] bool saveOnQuit = true;
         public UnityEvent OnNoSave, OnLoaded, OnSaved;
+        string sceneName = "";
         void Start()
         {
-            if (loadOnStart) Load();
-        }
-        public bool Load()
-        {
-            if (Filer.Instance == null)
+            sceneName = SceneManager.GetActiveScene().name;
+            if (loadOnStart)
             {
-                Debug.LogError("No filer instance to load with! Please set the filer before attempting to load the scene.");
-                return false;
+                StartCoroutine(Load());
             }
+        }
+        public IEnumerator Load()
+        {
+            if (SceneFiler.Filer == null)
+            {
+                Debug.LogError("No filer instance to load with! Please set the scene filer before attempting to load the scene.");
+            }
+            else
+            {
+                bool hasSave = SceneFiler.HasScene(sceneName);
 
-            bool loaded = SceneFiler.LoadScene(Filer.Instance);
-
-            if (loaded) OnLoaded?.Invoke();
-            else OnNoSave?.Invoke();
-
-            return loaded;
+                if (hasSave)
+                {
+                    yield return SceneFiler.LoadScene(sceneName);
+                    OnLoaded?.Invoke();
+                }
+                else
+                    OnNoSave?.Invoke();
+            }
         }
         private void OnApplicationQuit()
         {
@@ -37,13 +47,17 @@ namespace Floofinator.SimpleSave
         }
         public void Save()
         {
-            if (Filer.Instance == null)
+            if (SceneFiler.Filer == null)
             {
                 Debug.LogError("No filer instance to save with! Please set the filer before attempting to save the scene.");
                 return;
             }
 
-            SceneFiler.SaveScene(Filer.Instance);
+            IEnumerator saveRoutine = SceneFiler.SaveScene(sceneName);
+            while (saveRoutine.MoveNext())
+            {
+                // execute entire coroutine instantly
+            }
             OnSaved?.Invoke();
         }
     }

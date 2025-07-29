@@ -48,7 +48,7 @@ namespace Floofinator.SimpleSave
             }
             if (ID_DICTIONARY.ContainsKey(DictionaryID))
             {
-                Debug.LogWarning("ID \"" + DictionaryID + "\" already exists for \"" + gameObject.name + "\" it will not be added.");
+                Debug.LogWarning("Dictionary ID \"" + DictionaryID + "\" already exists for \"" + gameObject.name + "\" so it will not be added.");
                 return;
             }
             ID_DICTIONARY.Add(DictionaryID, this);
@@ -58,7 +58,7 @@ namespace Floofinator.SimpleSave
         {
             if (!ID_DICTIONARY.ContainsKey(DictionaryID))
             {
-                Debug.LogWarning("ID \"" + DictionaryID + "\" does not exist for \"" + gameObject.name + "\" so it cannot be removed.");
+                Debug.LogWarning("Dictionary ID \"" + DictionaryID + "\" does not exist for \"" + gameObject.name + "\" so it cannot be removed.");
                 return;
             }
             ID_DICTIONARY.Remove(DictionaryID);

@@ -9,16 +9,17 @@ namespace Floofinator.SimpleSave
 {
     public abstract class Filer
     {
-        public static Filer Instance;
         public string Root;
+        string persistentDataPath;
         public Filer() : this("") { }
         public Filer(string root)
         {
             Root = root;
+            persistentDataPath = Application.persistentDataPath;
         }
         string GetSystemRoot()
         {
-            return Path.Combine(Application.persistentDataPath, "SaveData", Root);
+            return Path.Combine(persistentDataPath, "SaveData", Root);
         }
         public void Compress()
         {

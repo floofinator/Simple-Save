@@ -15,22 +15,22 @@ namespace Floofinator.SimpleSave
         }
         private void Awake()
         {
-            if (Filer.Instance != null && !replace) return;
+            if (SceneFiler.Filer != null && !replace) return;
 
             switch (type)
             {
                 case FilerType.JSON:
-                    Filer.Instance = new JsonFiler();
+                    SceneFiler.Filer = new JsonFiler();
                     break;
                 case FilerType.BINARY:
-                    Filer.Instance = new BinaryFiler();
+                    SceneFiler.Filer = new BinaryFiler();
                     break;
                 case FilerType.XML:
-                    Filer.Instance = new XMLFiler();
+                    SceneFiler.Filer= new XMLFiler();
                     break;
             }
 
-            Filer.Instance.Root = saveRoot;
+            SceneFiler.Filer.Root = saveRoot;
         }
     }
 }
