@@ -37,9 +37,11 @@ namespace Floofinator.SimpleSave
             {
                 yield return SceneFiler.Load(sceneName);
                 OnLoaded?.Invoke();
+                if (logVerbose) Debug.Log("loaded scene data.");
             }
             else
                 OnNoData?.Invoke();
+                if (logVerbose) Debug.Log("No scene data.");
         }
         private void OnApplicationQuit()
         {
@@ -49,6 +51,7 @@ namespace Floofinator.SimpleSave
         {
             yield return SceneFiler.Save(sceneName);
             OnSaved?.Invoke();
+            if (logVerbose) Debug.Log("Saved scene data.");
         }
     }
 }
