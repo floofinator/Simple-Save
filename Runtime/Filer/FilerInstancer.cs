@@ -22,9 +22,11 @@ namespace Floofinator.SimpleSave
                 case FilerType.JSON:
                     SceneFiler.Filer = new JsonFiler();
                     break;
+
                 case FilerType.BINARY:
                     SceneFiler.Filer = new BinaryFiler();
                     break;
+                    
                 case FilerType.XML:
                     SceneFiler.Filer= new XMLFiler();
                     break;
