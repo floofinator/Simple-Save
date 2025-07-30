@@ -40,8 +40,10 @@ namespace Floofinator.SimpleSave
                 if (logVerbose) Debug.Log("loaded scene data.");
             }
             else
+            {
                 OnNoData?.Invoke();
                 if (logVerbose) Debug.Log("No scene data.");
+            }
         }
         private void OnApplicationQuit()
         {
