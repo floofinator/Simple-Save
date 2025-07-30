@@ -21,7 +21,7 @@ namespace Floofinator.SimpleSave
             }
         }
         public static event Action<float> OnProgressChanged;
-        static float LastProgressIncrement = 1.0f;
+        static readonly Stack<float> IncrementStack = new();
         static float ProgressIncrement = 1.0f;
         public enum ProgressStage
         {
@@ -118,16 +118,18 @@ namespace Floofinator.SimpleSave
 
         public static void DivideProgressFraction(string directory)
         {
-            var files = Filer.GetDirectories(directory);
-            LastProgressIncrement = ProgressIncrement;
-            if (files.Length > 0)
+            var files = Filer.GetFiles(directory);
+            var directories = Filer.GetDirectories(directory);
+            var total = files.Length + directories.Length;
+            IncrementStack.Push(ProgressIncrement);
+            if (total > 0)
             {
-                ProgressIncrement /= files.Length;  
+                ProgressIncrement /= total;  
             }
         }
         public static void RevertProgressFraction()
         {
-            ProgressIncrement = LastProgressIncrement;
+            ProgressIncrement = IncrementStack.Pop();
         }
         public static void LoadInstant(string sceneName)
         {
@@ -173,18 +175,26 @@ namespace Floofinator.SimpleSave
                 //all the subdirectories are instance id's and need to be re-instanced
                 string dataDirectory = Path.Combine(directory, dataName);
                 string[] splitName = dataName.Split('#');
+
+                DivideProgressFraction(dataDirectory);
+
                 if (splitName.Length > 1)
                 {
-                    DivideProgressFraction(dataDirectory);
                     foreach (string instanceDataName in Filer.GetDirectories(dataDirectory))
                     {
                         CreateIdentifiedInstance(splitName[1], instanceDataName, directory, sceneName);
+
                         Progress += ProgressIncrement;
+
                         yield return null;
                     }
-                    RevertProgressFraction();
                 }
+
                 yield return LoadDirectoryInstances(dataDirectory, sceneName);
+
+                Progress += ProgressIncrement;
+
+                RevertProgressFraction();
             }
 
             RevertProgressFraction();
@@ -193,6 +203,8 @@ namespace Floofinator.SimpleSave
         {
             Stage = ProgressStage.LOADING;
 
+            DivideProgressFraction(directory);
+
             //load data from files
             yield return LoadFiles(directory, sceneName);
 
@@ -200,8 +212,13 @@ namespace Floofinator.SimpleSave
             foreach (string dataName in Filer.GetDirectories(directory))
             {
                 string dataDirectory = Path.Combine(directory, dataName);
+
                 yield return LoadDirectory(dataDirectory, sceneName);
+                
+                Progress += ProgressIncrement;
             }
+
+            RevertProgressFraction();
         }
         static void CreateIdentifiedInstance(string prefabName, string instanceID, string directory, string sceneName)
         {
@@ -245,7 +262,6 @@ namespace Floofinator.SimpleSave
         {
             string parentID = GetIDFromDirectory(directory, sceneName);
 
-            DivideProgressFraction(directory);
             foreach (string dataName in Filer.GetFiles(directory))
             {
                 string dictionaryID = Path.GetFileNameWithoutExtension(dataName);
@@ -257,7 +273,6 @@ namespace Floofinator.SimpleSave
                         if (Filer.LoadFile(directory, $"{identity.ID}.save", saveable.GetSaveType(), out object data))
                         {
                             saveable.Load(data);
-                            Progress += ProgressIncrement;
                             yield return null;
                         }
                     }
@@ -266,8 +281,9 @@ namespace Floofinator.SimpleSave
                 {
                     Debug.LogWarning($"ID \"{dictionaryID}\" not found in dictionary");
                 }
+
+                Progress += ProgressIncrement;
             }
-            RevertProgressFraction();
         }
     }
 }
