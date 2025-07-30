@@ -77,6 +77,8 @@ namespace Floofinator.SimpleSave
 
             Filer.CreateDirectory(sceneName);
 
+            DivideProgressFraction(IdentifiedBehaviour.ID_DICTIONARY.Values.Count());
+
             foreach (IdentifiedBehaviour identity in IdentifiedBehaviour.ID_DICTIONARY.Values)
             {
                 if (identity is not ISaveable saveable) continue;
@@ -95,8 +97,12 @@ namespace Floofinator.SimpleSave
 
                 Filer.SaveFile(directory, $"{identity.ID}.save", saveable.Save());
 
+                Progress += ProgressIncrement;
+
                 yield return null;
             }
+
+            RevertProgressFraction();
 
             if (LogVerbose) Debug.Log("Data for scene \"" + sceneName + "\" saved.");
 
@@ -127,6 +133,14 @@ namespace Floofinator.SimpleSave
                 ProgressIncrement /= total;  
             }
         }
+        public static void DivideProgressFraction(int count)
+        {
+            IncrementStack.Push(ProgressIncrement);
+            if (count > 0)
+            {
+                ProgressIncrement /= count;  
+            }
+        }
         public static void RevertProgressFraction()
         {
             ProgressIncrement = IncrementStack.Pop();
@@ -145,17 +159,12 @@ namespace Floofinator.SimpleSave
             OnLoadStart?.Invoke();
 
             SetSceneActive(false);
-            yield return null;
 
             //load instances first before loading data so that they can be identified
             yield return LoadDirectoryInstances(sceneName, sceneName);
 
-            yield return null;
-            
-
             yield return LoadDirectory(sceneName, sceneName);
 
-            yield return null;
             SetSceneActive(true);
 
             if (LogVerbose) Debug.Log("Data for scene \"" + sceneName + "\" loaded.");
@@ -165,8 +174,6 @@ namespace Floofinator.SimpleSave
         }
         static IEnumerator LoadDirectoryInstances(string directory, string sceneName)
         {
-            DivideProgressFraction(directory);
-
             Stage = ProgressStage.INSTANCING;
 
             foreach (string dataName in Filer.GetDirectories(directory))
@@ -176,28 +183,19 @@ namespace Floofinator.SimpleSave
                 string dataDirectory = Path.Combine(directory, dataName);
                 string[] splitName = dataName.Split('#');
 
-                DivideProgressFraction(dataDirectory);
-
+                //is actually an instance directory
                 if (splitName.Length > 1)
                 {
                     foreach (string instanceDataName in Filer.GetDirectories(dataDirectory))
                     {
                         CreateIdentifiedInstance(splitName[1], instanceDataName, directory, sceneName);
 
-                        Progress += ProgressIncrement;
-
                         yield return null;
                     }
                 }
 
                 yield return LoadDirectoryInstances(dataDirectory, sceneName);
-
-                Progress += ProgressIncrement;
-
-                RevertProgressFraction();
             }
-
-            RevertProgressFraction();
         }
         static IEnumerator LoadDirectory(string directory, string sceneName)
         {
