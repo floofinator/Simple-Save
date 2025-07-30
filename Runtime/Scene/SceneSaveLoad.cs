@@ -10,50 +10,64 @@ namespace Floofinator.SimpleSave
 {
     public class SceneSaveLoad : MonoBehaviour
     {
-        [SerializeField] bool logVerbose = false;
+        [SerializeField] bool logVerbose;
         [SerializeField] bool loadOnStart = true;
         [SerializeField] bool saveOnQuit = true;
         public UnityEvent OnNoData, OnLoaded, OnSaved;
         string sceneName = "";
+
         void Start()
         {
             SceneFiler.LogVerbose = logVerbose;
             IdentifiedBehaviour.LogVerbose = logVerbose;
-
             SceneFiler.InitializeIdentification();
-
             sceneName = SceneManager.GetActiveScene().name;
-            
             if (loadOnStart)
             {
                 StartCoroutine(Load());
             }
         }
+
         public IEnumerator Load()
         {
-            bool hasSave = SceneFiler.HasScene(sceneName);
-
-            if (hasSave)
+            if (SceneFiler.HasScene(sceneName))
             {
+                SceneFiler.Filer.UnCompress();
                 yield return SceneFiler.Load(sceneName);
+                SceneFiler.Filer.DeleteUnCompress();
                 OnLoaded?.Invoke();
-                if (logVerbose) Debug.Log("loaded scene data.");
+                if (logVerbose)
+                {
+                    Debug.Log("loaded scene data.");
+                }
             }
             else
             {
                 OnNoData?.Invoke();
-                if (logVerbose) Debug.Log("No scene data.");
+                if (logVerbose)
+                {
+                    Debug.Log("No scene data.");
+                }
             }
         }
-        private void OnApplicationQuit()
+
+        void OnApplicationQuit()
         {
-            if (saveOnQuit) SceneFiler.SaveInstant(sceneName);
+            if (saveOnQuit)
+            {
+                SceneFiler.SaveInstant(sceneName);
+            }
         }
+
         public IEnumerator Save()
         {
             yield return SceneFiler.Save(sceneName);
+            SceneFiler.Filer.Compress();
             OnSaved?.Invoke();
-            if (logVerbose) Debug.Log("Saved scene data.");
+            if (logVerbose)
+            {
+                Debug.Log("Saved scene data.");
+            }
         }
     }
 }
