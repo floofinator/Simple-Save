@@ -18,7 +18,7 @@ namespace Floofinator.SimpleSave
             {
                 _progress = value;
                 OnProgressChanged?.Invoke(value);
-                Debug.Log("Progressed to " + _progress);
+                if (LogVerbose) Debug.Log("Progressed to " + _progress);
             }
         }
         public static event Action<float> OnProgressChanged;
@@ -130,7 +130,7 @@ namespace Floofinator.SimpleSave
             if (count > 0)
             {
                 ProgressIncrement /= count;
-                Debug.Log(count + " items with increment " + ProgressIncrement);
+                if (LogVerbose) Debug.Log(count + " items with increment " + ProgressIncrement);
             }
         }
         public static void RevertProgressFraction()
@@ -152,10 +152,14 @@ namespace Floofinator.SimpleSave
 
             SetSceneActive(false);
 
+            DivideProgressFraction(2);
+
             //load instances first before loading data so that they can be identified
             yield return LoadDirectoryInstances(sceneName, sceneName);
 
             yield return LoadDirectory(sceneName, sceneName);
+
+            RevertProgressFraction();
 
             SetSceneActive(true);
 
@@ -168,25 +172,39 @@ namespace Floofinator.SimpleSave
         {
             Stage = ProgressStage.INSTANCING;
 
+            List<string> instanceNames = new();
+
             foreach (string dataName in Filer.GetDirectories(directory))
             {
-                //if this directory is an instanced object, denoted by the '#' as a starting character
-                //all the subdirectories are instance id's and need to be re-instanced
-                string dataDirectory = Path.Combine(directory, dataName);
-                string[] splitName = dataName.Split('#');
-
-                //is actually an instance directory
-                if (splitName.Length > 1)
+                //if this directory is for instanced objects denoted by the '#' as a starting character
+                if (dataName.StartsWith('#'))
                 {
-                    foreach (string instanceDataName in Filer.GetDirectories(dataDirectory))
-                    {
-                        CreateIdentifiedInstance(splitName[1], instanceDataName, directory, sceneName);
+                    instanceNames.Add(dataName);
+                }
+            }
 
-                        yield return null;
-                    }
+            foreach (string dataName in instanceNames)
+            {
+                //all the subdirectories are instance id's and need to be re-instanced
+                string instanceType = dataName.Split('#')[1];
+                string dataDirectory = Path.Combine(directory, dataName);
+
+                string[] instanceDirs = Filer.GetDirectories(dataDirectory);
+
+                DivideProgressFraction(instanceDirs.Length);
+
+                foreach (string instanceDataName in instanceDirs)
+                {
+                    CreateIdentifiedInstance(instanceType, instanceDataName, directory, sceneName);
+
+                    Progress += ProgressIncrement;
+
+                    yield return null;
                 }
 
                 yield return LoadDirectoryInstances(dataDirectory, sceneName);
+
+                RevertProgressFraction();
             }
         }
         static IEnumerator LoadDirectory(string directory, string sceneName)
