@@ -78,6 +78,8 @@ namespace Floofinator.SimpleSave
 
             Filer.CreateDirectory(sceneName);
 
+            SetSceneActive(false);
+
             DivideProgressFraction(IdentifiedBehaviour.ID_DICTIONARY.Values.Count());
 
             foreach (IdentifiedBehaviour identity in IdentifiedBehaviour.ID_DICTIONARY.Values)
@@ -104,6 +106,8 @@ namespace Floofinator.SimpleSave
 
                 yield return null;
             }
+            
+            SetSceneActive(true);
 
             RevertProgressFraction();
 
