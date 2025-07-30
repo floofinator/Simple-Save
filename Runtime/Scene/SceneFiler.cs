@@ -172,39 +172,39 @@ namespace Floofinator.SimpleSave
         {
             Stage = ProgressStage.INSTANCING;
 
-            List<string> instanceNames = new();
-
             foreach (string dataName in Filer.GetDirectories(directory))
             {
-                //if this directory is for instanced objects denoted by the '#' as a starting character
-                if (dataName.StartsWith('#'))
-                {
-                    instanceNames.Add(dataName);
-                }
-            }
-
-            foreach (string dataName in instanceNames)
-            {
                 //all the subdirectories are instance id's and need to be re-instanced
-                string instanceType = dataName.Split('#')[1];
                 string dataDirectory = Path.Combine(directory, dataName);
 
-                string[] instanceDirs = Filer.GetDirectories(dataDirectory);
-
-                DivideProgressFraction(instanceDirs.Length);
-
-                foreach (string instanceDataName in instanceDirs)
+                if (dataName.StartsWith('#'))
                 {
-                    CreateIdentifiedInstance(instanceType, instanceDataName, directory, sceneName);
+                    string instanceType = dataName.Split('#')[1];
 
-                    Progress += ProgressIncrement;
+                    string[] instanceDirs = Filer.GetDirectories(dataDirectory);
 
-                    yield return null;
+                    DivideProgressFraction(instanceDirs.Length);
+
+                    foreach (string instanceDataName in instanceDirs)
+                    {
+                        CreateIdentifiedInstance(instanceType, instanceDataName, directory, sceneName);
+
+                        Progress += ProgressIncrement;
+
+                        yield return null;
+                    }
+                    
+                    yield return LoadDirectoryInstances(dataDirectory, sceneName);
+
+                    RevertProgressFraction();
+                }
+                else
+                {
+
+                    yield return LoadDirectoryInstances(dataDirectory, sceneName);
+                
                 }
 
-                yield return LoadDirectoryInstances(dataDirectory, sceneName);
-
-                RevertProgressFraction();
             }
         }
         static IEnumerator LoadDirectory(string directory, string sceneName)
