@@ -18,14 +18,22 @@ namespace Floofinator.SimpleSave
 
         void Start()
         {
+            SceneFiler.StayActive.Add(gameObject);
+
             SceneFiler.LogVerbose = logVerbose;
             IdentifiedBehaviour.LogVerbose = logVerbose;
+
             SceneFiler.InitializeIdentification();
             sceneName = SceneManager.GetActiveScene().name;
             if (loadOnStart)
             {
                 StartCoroutine(Load());
             }
+        }
+
+        void OnDestroy()
+        {
+            SceneFiler.StayActive.Remove(gameObject);
         }
 
         public IEnumerator Load()

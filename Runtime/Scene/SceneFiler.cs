@@ -41,6 +41,7 @@ namespace Floofinator.SimpleSave
         public static event Action<ProgressStage> OnStageChanged;
         public static event Action OnLoadFinish,OnLoadStart,OnSaveFinish,OnSaveStart;
         public static bool LogVerbose = false;
+        public static readonly List<GameObject> StayActive = new();
         public static void InitializeIdentification()
         {
             IdentifiedBehaviour.ID_DICTIONARY.Clear();
@@ -56,10 +57,12 @@ namespace Floofinator.SimpleSave
         }
         static void SetSceneActive(bool active)
         {
-            
-            foreach (IdentifiedBehaviour identity in IdentifiedBehaviour.ID_DICTIONARY.Values)
+            foreach (GameObject rootObjects in SceneManager.GetActiveScene().GetRootGameObjects())
             {
-                identity.gameObject.SetActive(active);
+                if (!StayActive.Contains(rootObjects))
+                {
+                    rootObjects.SetActive(active);
+                }
             }
         }
         public static void SaveInstant(string sceneName)
