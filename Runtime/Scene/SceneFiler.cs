@@ -18,6 +18,7 @@ namespace Floofinator.SimpleSave
             {
                 _progress = value;
                 OnProgressChanged?.Invoke(value);
+                Debug.Log("Progressed to " + _progress);
             }
         }
         public static event Action<float> OnProgressChanged;
@@ -123,24 +124,13 @@ namespace Floofinator.SimpleSave
         {
             return Filer.DirectoryExists(sceneName);
         }
-
-        public static void DivideProgressFraction(string directory)
-        {
-            var files = Filer.GetFiles(directory);
-            var directories = Filer.GetDirectories(directory);
-            var total = files.Length + directories.Length;
-            IncrementStack.Push(ProgressIncrement);
-            if (total > 0)
-            {
-                ProgressIncrement /= total;  
-            }
-        }
         public static void DivideProgressFraction(int count)
         {
             IncrementStack.Push(ProgressIncrement);
             if (count > 0)
             {
-                ProgressIncrement /= count;  
+                ProgressIncrement /= count;
+                Debug.Log(count + " items with increment " + ProgressIncrement);
             }
         }
         public static void RevertProgressFraction()
@@ -203,7 +193,7 @@ namespace Floofinator.SimpleSave
         {
             Stage = ProgressStage.LOADING;
 
-            DivideProgressFraction(directory);
+            DivideProgressFraction(Filer.GetFiles(directory).Count() + Filer.GetDirectories(directory).Count());
 
             //load data from files
             yield return LoadFiles(directory, sceneName);
@@ -214,8 +204,6 @@ namespace Floofinator.SimpleSave
                 string dataDirectory = Path.Combine(directory, dataName);
 
                 yield return LoadDirectory(dataDirectory, sceneName);
-                
-                Progress += ProgressIncrement;
             }
 
             RevertProgressFraction();
