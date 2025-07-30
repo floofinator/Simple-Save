@@ -23,11 +23,22 @@ namespace Floofinator.SimpleSave
         public static event Action<float> OnProgressChanged;
         static float LastProgressIncrement = 1.0f;
         static float ProgressIncrement = 1.0f;
-        public enum FilingStage
+        public enum ProgressStage
         {
             IDLE, INSTANCING, LOADING, SAVING
         }
-        public static FilingStage CurrentStage;
+        static ProgressStage _stage;
+        public static ProgressStage Stage
+        {
+            get => _stage;
+            private set
+            {
+                _stage = value;
+                OnStageChanged?.Invoke(value);
+            }
+        }
+        public static event Action<ProgressStage> OnStageChanged;
+        public static event Action OnLoadFinish,OnLoadStart,OnSaveFinish,OnSaveStart;
         public static bool LogVerbose = false;
         public static void InitializeIdentification()
         {
@@ -61,7 +72,8 @@ namespace Floofinator.SimpleSave
         public static IEnumerator Save(string sceneName)
         {
             Progress = 0;
-            CurrentStage = FilingStage.SAVING;
+            Stage = ProgressStage.SAVING;
+            OnSaveStart?.Invoke();
 
             Filer.CreateDirectory(sceneName);
 
@@ -88,7 +100,9 @@ namespace Floofinator.SimpleSave
 
             if (LogVerbose) Debug.Log("Data for scene \"" + sceneName + "\" saved.");
 
-            CurrentStage = FilingStage.IDLE;
+            Stage = ProgressStage.IDLE;
+
+            OnSaveFinish?.Invoke();
         }
         public static void ClearScene(string sceneName)
         {
@@ -126,6 +140,7 @@ namespace Floofinator.SimpleSave
         public static IEnumerator Load(string sceneName)
         {
             Progress = 0;
+            OnLoadStart?.Invoke();
 
             SetSceneActive(false);
             yield return null;
@@ -143,13 +158,14 @@ namespace Floofinator.SimpleSave
 
             if (LogVerbose) Debug.Log("Data for scene \"" + sceneName + "\" loaded.");
 
-            CurrentStage = FilingStage.IDLE;
+            Stage = ProgressStage.IDLE;
+            OnLoadFinish?.Invoke();
         }
         static IEnumerator LoadDirectoryInstances(string directory, string sceneName)
         {
             DivideProgressFraction(directory);
 
-            CurrentStage = FilingStage.INSTANCING;
+            Stage = ProgressStage.INSTANCING;
 
             foreach (string dataName in Filer.GetDirectories(directory))
             {
@@ -175,7 +191,7 @@ namespace Floofinator.SimpleSave
         }
         static IEnumerator LoadDirectory(string directory, string sceneName)
         {
-            CurrentStage = FilingStage.LOADING;
+            Stage = ProgressStage.LOADING;
 
             //load data from files
             yield return LoadFiles(directory, sceneName);
