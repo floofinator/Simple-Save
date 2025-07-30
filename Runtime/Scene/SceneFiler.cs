@@ -97,6 +97,8 @@ namespace Floofinator.SimpleSave
 
                 Filer.SaveFile(directory, $"{identity.ID}.save", saveable.Save());
 
+                if (LogVerbose) Debug.Log("Data for \"" + identity.ID + "\" saved.");
+
                 Progress += ProgressIncrement;
 
                 yield return null;
@@ -271,6 +273,9 @@ namespace Floofinator.SimpleSave
                         if (Filer.LoadFile(directory, $"{identity.ID}.save", saveable.GetSaveType(), out object data))
                         {
                             saveable.Load(data);
+
+                            if (LogVerbose) Debug.Log("Loaded data for " + identity.ID);
+
                             yield return null;
                         }
                     }
