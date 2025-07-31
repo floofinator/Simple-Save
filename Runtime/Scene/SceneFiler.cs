@@ -56,7 +56,7 @@ namespace Floofinator.SimpleSave
                 identity.AddToDictionary();
             }
         }
-        static void SetSceneActive()
+        static void SetSceneInactive()
         {
             ToActivate.Clear();
 
@@ -69,7 +69,7 @@ namespace Floofinator.SimpleSave
                 }
             }
         }
-        static void SetSceneInactive()
+        static void SetSceneActive()
         {
             foreach (GameObject rootObject in ToActivate)
             {
@@ -265,6 +265,7 @@ namespace Floofinator.SimpleSave
             instance.GetComponent<IdentifiedInstance>().AssignInstanceID(instanceID);
 
             instance.SetActive(false);
+            ToActivate.Add(instance);
 
             if (LogVerbose) Debug.Log("Instantiated \"" + prefabName + "\" with ID " + instanceID);
         }
