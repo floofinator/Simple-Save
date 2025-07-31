@@ -13,6 +13,7 @@ namespace Floofinator.SimpleSave
         [SerializeField] bool logVerbose;
         [SerializeField] bool loadOnStart = true;
         [SerializeField] bool saveOnQuit = true;
+        [SerializeField] bool compressSave = true;
         public UnityEvent OnNoData, OnLoaded, OnSaved;
         string sceneName = "";
 
@@ -38,11 +39,11 @@ namespace Floofinator.SimpleSave
 
         public IEnumerator Load()
         {
+            if (compressSave) SceneFiler.Filer.UnCompress();
             if (SceneFiler.HasScene(sceneName))
             {
-                SceneFiler.Filer.UnCompress();
                 yield return SceneFiler.Load(sceneName);
-                SceneFiler.Filer.DeleteUnCompress();
+
                 OnLoaded?.Invoke();
                 if (logVerbose)
                 {
@@ -57,6 +58,7 @@ namespace Floofinator.SimpleSave
                     Debug.Log("No scene data.");
                 }
             }
+            if (compressSave) SceneFiler.Filer.DeleteUnCompress();
         }
 
         void OnApplicationQuit()
@@ -64,13 +66,14 @@ namespace Floofinator.SimpleSave
             if (saveOnQuit)
             {
                 SceneFiler.SaveInstant(sceneName);
+                if (compressSave) SceneFiler.Filer.Compress();
             }
         }
 
         public IEnumerator Save()
         {
             yield return SceneFiler.Save(sceneName);
-            SceneFiler.Filer.Compress();
+            if (compressSave) SceneFiler.Filer.Compress();
             OnSaved?.Invoke();
             if (logVerbose)
             {
