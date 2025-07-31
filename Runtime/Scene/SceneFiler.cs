@@ -42,6 +42,7 @@ namespace Floofinator.SimpleSave
         public static event Action OnLoadFinish,OnLoadStart,OnSaveFinish,OnSaveStart;
         public static bool LogVerbose = false;
         public static readonly List<GameObject> StayActive = new();
+        static readonly List<GameObject> ToActivate = new();
         public static void InitializeIdentification()
         {
             IdentifiedBehaviour.ID_DICTIONARY.Clear();
@@ -55,14 +56,24 @@ namespace Floofinator.SimpleSave
                 identity.AddToDictionary();
             }
         }
-        static void SetSceneActive(bool active)
+        static void SetSceneActive()
         {
-            foreach (GameObject rootObjects in SceneManager.GetActiveScene().GetRootGameObjects())
+            ToActivate.Clear();
+
+            foreach (GameObject rootObject in SceneManager.GetActiveScene().GetRootGameObjects())
             {
-                if (!StayActive.Contains(rootObjects))
+                if (rootObject.activeSelf && !StayActive.Contains(rootObject))
                 {
-                    rootObjects.SetActive(active);
+                    rootObject.SetActive(false);
+                    ToActivate.Add(rootObject);
                 }
+            }
+        }
+        static void SetSceneInactive()
+        {
+            foreach (GameObject rootObject in ToActivate)
+            {
+                rootObject.SetActive(true);
             }
         }
         public static void SaveInstant(string sceneName)
@@ -81,7 +92,7 @@ namespace Floofinator.SimpleSave
 
             Filer.CreateDirectory(sceneName);
 
-            SetSceneActive(false);
+            SetSceneInactive();
 
             DivideProgressFraction(IdentifiedBehaviour.ID_DICTIONARY.Values.Count());
 
@@ -110,7 +121,7 @@ namespace Floofinator.SimpleSave
                 yield return null;
             }
             
-            SetSceneActive(true);
+            SetSceneActive();
 
             RevertProgressFraction();
 
@@ -157,7 +168,7 @@ namespace Floofinator.SimpleSave
             Progress = 0;
             OnLoadStart?.Invoke();
 
-            SetSceneActive(false);
+            SetSceneInactive();
 
             DivideProgressFraction(2);
 
@@ -168,7 +179,7 @@ namespace Floofinator.SimpleSave
 
             RevertProgressFraction();
 
-            SetSceneActive(true);
+            SetSceneActive();
 
             if (LogVerbose) Debug.Log("Data for scene \"" + sceneName + "\" loaded.");
 
