@@ -46,11 +46,11 @@ namespace Floofinator.SimpleSave
 
             if (!File.Exists(fileName))
             {   
-                Debug.Log("Nothing to uncompress");
+                // Debug.Log("Nothing to uncompress");
                 return;
             }
 
-            Debug.Log("UnCompress");
+            // Debug.Log("UnCompress");
 
             if (Directory.Exists(RootPath)) Directory.Delete(RootPath, true);
 
@@ -61,11 +61,11 @@ namespace Floofinator.SimpleSave
             if (Directory.Exists(RootPath))
             {
                 Directory.Delete(RootPath, true);
-                Debug.Log("Delete UnCompress");
+                // Debug.Log("Delete UnCompress");
             }
             else
             {
-                Debug.Log("No UnCompress to Delete");
+                // Debug.Log("No UnCompress to Delete");
             }
         }
         public void DeleteFile(string directory, string fileName)
@@ -75,7 +75,7 @@ namespace Floofinator.SimpleSave
 
             if (File.Exists(filePath)) File.Delete(filePath);
 
-            Debug.Log($"Deleted file from \"{directoryPath}\"");
+            // Debug.Log($"Deleted file from \"{directoryPath}\"");
         }
         public bool FileExists(string directory, string fileName)
         {
